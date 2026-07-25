@@ -3,7 +3,7 @@ requires = ["setuptools>=69", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "exerx-eye"
+name = "ExerxEye"
 version = "1.0.1"
 description = "Terminal-first exercise intelligence, workout tracking, and progress analytics platform."
 readme = "README-TUI.md"
