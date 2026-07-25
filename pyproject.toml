@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=69", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "exerx-eye"
+version = "1.0.0"
+description = "Terminal-first exercise intelligence, workout tracking, and progress analytics platform."
+readme = "README-TUI.md"
+requires-python = ">=3.10"
+dependencies = ["textual>=0.70", "rich>=13.7"]
+authors = [{name = "Jeremy Franklin"}]
+license = {text = "MIT"}
+keywords = ["textual", "sqlite", "fitness", "tui", "exercise"]
+classifiers = [
+  "Environment :: Console",
+  "Programming Language :: Python :: 3",
+  "Topic :: Database :: Front-Ends",
+]
+
+[project.scripts]
+exerx-eye = "exerx_eye.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["exerx_eye*"]
