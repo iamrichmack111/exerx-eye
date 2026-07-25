@@ -39,7 +39,7 @@ def sparkline(values: list[float]) -> str:
 
 class ExerciseTUI(App):
     TITLE = "EXERXEYE — Exercise Intelligence & Analytics"
-    SUB_TITLE = "EXERXEYE — Exercise Intelligence & Analytics"
+    SUB_TITLE = "Exercise Intelligence & Analytics"
     BINDINGS = [
         Binding("q", "quit", "Quit"), Binding("/", "focus_search", "Search"),
         Binding("r", "random_one", "Random"), Binding("6", "random_six", "Random ×6"),
@@ -79,6 +79,14 @@ class ExerciseTUI(App):
     #progress-table { width: 3fr; }
     #progress-charts { width: 2fr; padding: 0 1; border-left: solid $primary; }
     #stats-view, #system-view { padding: 1 2; }
+
+    .helpbar {
+        height: auto;
+        min-height: 2;
+        padding: 0 1;
+        color: $text-muted;
+        border-bottom: solid $panel;
+    }
     """
 
     def __init__(self, db_path: Path = DEFAULT_DB):
@@ -96,6 +104,7 @@ class ExerciseTUI(App):
         yield Header(show_clock=True)
         with TabbedContent(initial="browse"):
             with TabPane("Browse", id="browse"):
+                yield Static("↑/↓ select • Enter/details update automatically • A add to active workout • X compare • F favorite • / focus search • C clear filters", classes="helpbar")
                 with Horizontal(id="filters"):
                     yield Input(placeholder="Search exercises…", id="search")
                     yield Select([(k, k) for k in SEARCHABLE], value="All", id="field", allow_blank=False)
@@ -107,12 +116,14 @@ class ExerciseTUI(App):
                     with VerticalScroll(classes="detail"):
                         yield Static("Select an exercise", classes="detail-title", id="detail-content")
             with TabPane("Muscles", id="muscles"):
+                yield Static("Choose a muscle group on the left, then choose an exercise in the center to view full instructions.", classes="helpbar")
                 with Horizontal(id="muscle-body"):
                     yield DataTable(id="muscle-list", cursor_type="row", zebra_stripes=True)
                     yield DataTable(id="muscle-exercises", cursor_type="row", zebra_stripes=True)
                     with VerticalScroll(classes="detail"):
                         yield Static("Choose a muscle group", id="muscle-detail-content")
             with TabPane("Random", id="random"):
+                yield Static("Press R for one random exercise or 6 for six. Select a result, then use F to favorite, A to add it to the active workout, or X to compare.", classes="helpbar")
                 with Horizontal(id="random-controls"):
                     yield Select([], prompt="Muscle / all", id="random-muscle")
                     yield Static("R = one random • 6 = six random • F = favorite • A = add to workout", id="random-help", classes="muted")
@@ -121,6 +132,7 @@ class ExerciseTUI(App):
                     with VerticalScroll(classes="detail"):
                         yield Static("Generate a random exercise", id="random-detail-content")
             with TabPane("Workouts", id="workouts"):
+                yield Static("WORKOUT FLOW: 1) Enter a name and Create Workout. 2) Select that workout. 3) Go to Browse and press A on exercises. 4) Return here and Start Session. 5) Select an exercise, enter reps/weight, Log Set. 6) Finish Session.", classes="helpbar")
                 with Horizontal(id="workout-create"):
                     yield Input(placeholder="New workout name (Push Day, Pull Day…)", id="workout-name")
                     yield Button("Create Workout", id="create-workout", variant="primary")
@@ -136,14 +148,18 @@ class ExerciseTUI(App):
                             yield Input(value="0", placeholder="Weight", id="log-weight", type="number")
                             yield Button("Log Set", id="log-set", variant="primary")
             with TabPane("Progress", id="progress"):
+                yield Static("Progress is built from completed workout sessions. Each logged set contributes to volume and estimated 1RM trends.", classes="helpbar")
                 with Horizontal(id="progress-body"):
                     yield DataTable(id="progress-table", cursor_type="row", zebra_stripes=True)
                     yield Static(id="progress-charts")
             with TabPane("Statistics", id="stats"):
+                yield Static("Dataset analytics update automatically as the exercise database changes.", classes="helpbar")
                 yield Static(id="stats-view")
             with TabPane("Compare", id="compare"):
-                yield Static("Select an exercise and press X. Add two exercises to compare them.", id="compare-view", classes="detail")
+                yield Static("HOW TO COMPARE: Go to Browse, highlight the first exercise and press X. Highlight the second exercise and press X. Return here to see the side-by-side comparison.", classes="helpbar")
+                yield Static("No exercises selected yet. Go to Browse and press X on two exercises.", id="compare-view", classes="detail")
             with TabPane("System", id="system"):
+                yield Static("Local application/database health. The architecture details below describe deployment; they are no longer shown in the top banner.", classes="helpbar")
                 yield Static(id="system-view")
         yield Footer()
 
@@ -178,7 +194,7 @@ class ExerciseTUI(App):
             return default if v is Select.BLANK else str(v)
         self.current_rows=self.db.query(text=self.query_one("#search", Input).value, field=val("#field"), equipment=val("#equipment"), muscle=val("#muscle"), difficulty=val("#difficulty"))
         self._fill_exercise_table(self.query_one("#results", DataTable), self.current_rows)
-        self.sub_title=f"SQLite • FastAPI • Textual • {len(self.current_rows)} shown / {self.db.count()} total"
+        self.sub_title=f"Exercise Intelligence & Analytics  •  {len(self.current_rows)} shown / {self.db.count()} total"
 
     def refresh_muscles(self) -> None:
         table=self.query_one("#muscle-list", DataTable); table.clear()

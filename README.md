@@ -2,258 +2,735 @@
 
 **Exercise Intelligence & Analytics**
 
-ExerxEye is a terminal-first training intelligence platform that combines exercise discovery, workout construction, persistent set history, progress analytics, comparison tools, a REST API, and operational health diagnostics.
-
-## Product surfaces
-
-- `exerx-eye tui` — keyboard-first Textual interface
-- `exerx-eye search` — fast exercise discovery
-- `exerx-eye random` — randomized exercise selection
-- `exerx-eye stats` — dataset/training analytics
-- `exerx-eye doctor` — database/system health checks
-- FastAPI REST service for programmatic access
-
-
-Here's the updated `README.md` with detailed information on how to query the API, including all possible queries by headers and the newly added endpoints.
+ExerxEye is a terminal-first exercise discovery, workout-building, and training-progress application. It combines a searchable exercise database with workout planning, set logging, comparison tools, favorites, analytics, progress trends, a CLI, and an optional FastAPI service.
 
 ---
 
-# Gym Exercise Search API
+## What ExerxEye does
 
-This FastAPI application allows users to query a dataset of gym exercises and retrieve exercises based on specific criteria, such as equipment, target muscles, variation, utility, mechanics, and more. It supports retrieving random exercises by muscle groups and lists all available muscle groups.
+ExerxEye gives you several ways to work with the exercise dataset:
 
-## Project Setup
-
-1. **Install dependencies**:
-
-   Install the required Python packages by running the following command:
-
-   ```bash
-   pip install fastapi pandas hypercorn
-   ```
-
-2. **Run the Application**:
-
-   Use Hypercorn to run the FastAPI server:
-
-   ```bash
-   hypercorn app:app --reload
-   ```
-
-3. **Access the API**:
-
-   The API will be available at `http://127.0.0.1:8000/`.
-
-## Dataset
-
-The dataset used for this application is in CSV format, with the following headers:
-
-### CSV Headers:
-
-- **Exercise Name**: The name of the exercise (e.g., "Bench Press").
-- **Equipment**: The equipment required for the exercise (e.g., "Barbell").
-- **Variation**: The variation of the exercise (e.g., "Back Squat").
-- **Utility**: The utility or purpose of the exercise (e.g., "Strength").
-- **Mechanics**: The mechanics type of the exercise (e.g., "Compound").
-- **Force**: The direction of force applied during the exercise (e.g., "Push" or "Pull").
-- **Preparation**: The setup/preparation steps for the exercise.
-- **Execution**: The execution or performance instructions for the exercise.
-- **Target_Muscles**: The primary muscles targeted by the exercise (e.g., "Quadriceps", "Hamstrings").
-- **Synergist_Muscles**: Secondary muscles that assist the primary muscles.
-- **Stabilizer_Muscles**: Muscles responsible for stabilizing the body during the exercise.
-- **Antagonist_Muscles**: Muscles that oppose the primary muscles during the exercise.
-- **Dynamic_Stabilizer_Muscles**: Muscles responsible for stabilizing joints dynamically during the exercise.
-- **Main_muscle**: The main muscle worked in the exercise.
-- **Difficulty (1-5)**: The difficulty rating of the exercise, where 1 is easiest and 5 is hardest.
-- **Secondary Muscles**: Additional muscles engaged during the exercise.
-- **parent_id**: Used for referencing variations of exercises (if applicable).
-
-## Querying the API
-
-Below are the available endpoints, including detailed examples of how to query the API for various exercise-related information.
-
-### 1. **Search for Exercises Based on Column and Value**
-
-You can search for exercises by providing a column (header) and a value to search for. For example, you can search for exercises by equipment, target muscles, variation, and more.
-
-#### Endpoint:
-```bash
-GET /search?column=<column>&value=<value>
-```
-
-#### Example Queries:
-
-- **Search for exercises using a Barbell:**
-  ```bash
-  http://127.0.0.1:8000/search?column=Equipment&value=Barbell
-  ```
-
-- **Search for exercises targeting the Quadriceps:**
-  ```bash
-  http://127.0.0.1:8000/search?column=Target_Muscles&value=Quadriceps
-  ```
-
-### 2. **Get 6 Random Exercises for Each Muscle**
-
-This endpoint allows you to retrieve up to 6 random exercises for each muscle group. You can also specify a muscle group and get only 6 exercises for that muscle.
-
-#### Endpoint:
-```bash
-GET /six_exercises_per_muscle?muscle=<muscle_name>  # Optional muscle query parameter
-```
-
-#### Example Queries:
-
-- **Get 6 random exercises for all muscles:**
-  ```bash
-  http://127.0.0.1:8000/six_exercises_per_muscle
-  ```
-
-- **Get 6 random exercises targeting the Hamstrings:**
-  ```bash
-  http://127.0.0.1:8000/six_exercises_per_muscle?muscle=Hamstrings
-  ```
-
-### 3. **Get One Random Exercise for Each Muscle**
-
-This endpoint allows you to retrieve one random exercise for each muscle group. You can also specify a muscle group and get only one exercise for that muscle.
-
-#### Endpoint:
-```bash
-GET /one_exercise_per_muscle?muscle=<muscle_name>  # Optional muscle query parameter
-```
-
-#### Example Queries:
-
-- **Get one random exercise for all muscles:**
-  ```bash
-  http://127.0.0.1:8000/one_exercise_per_muscle
-  ```
-
-- **Get one random exercise targeting the Quadriceps:**
-  ```bash
-  http://127.0.0.1:8000/one_exercise_per_muscle?muscle=Quadriceps
-  ```
-
-### 4. **List All Available Muscles**
-
-This endpoint lists all the unique muscle groups available in the dataset.
-
-#### Endpoint:
-```bash
-GET /list_muscles
-```
-
-#### Example Query:
-```bash
-http://127.0.0.1:8000/list_muscles
-```
-
-#### Example Output:
-```json
-{
-    "muscles": [
-        "Quadriceps",
-        "Hamstrings",
-        "Pectorals",
-        "Triceps",
-        "Biceps",
-        "Shoulders",
-        "Glutes",
-        "Calves",
-        "Core",
-        "Lower Back",
-        "Lats",
-        "Forearms",
-        "Hip Flexors"
-    ]
-}
-```
-
-### 5. **Search by Specific Headers**
-
-Here are additional endpoints for querying by specific headers from the dataset. These endpoints make it easier to search without specifying the `column` parameter explicitly.
-
-#### Endpoint for Searching by Equipment:
-```bash
-GET /search_by_equipment?equipment=<equipment_name>
-```
-
-#### Example Query:
-```bash
-http://127.0.0.1:8000/search_by_equipment?equipment=Barbell
-```
-
-#### Endpoint for Searching by Variation:
-```bash
-GET /search_by_variation?variation=<variation_name>
-```
-
-#### Example Query:
-```bash
-http://127.0.0.1:8000/search_by_variation?variation=Back%20Squat
-```
-
-#### Endpoint for Searching by Utility:
-```bash
-GET /search_by_utility?utility=<utility_name>
-```
-
-#### Example Query:
-```bash
-http://127.0.0.1:8000/search_by_utility?utility=Strength
-```
-
-#### Endpoint for Searching by Mechanics:
-```bash
-GET /search_by_mechanics?mechanics=<mechanics_name>
-```
-
-#### Example Query:
-```bash
-http://127.0.0.1:8000/search_by_mechanics?mechanics=Compound
-```
-
-#### Endpoint for Searching by Force:
-```bash
-GET /search_by_force?force=<force_name>
-```
-
-#### Example Query:
-```bash
-http://127.0.0.1:8000/search_by_force?force=Push
-```
-
-### Error Handling
-
-- If you query an invalid column or muscle name, you will receive an appropriate error message.
-- Example error response for invalid column:
-  ```json
-  {
-    "error": "Invalid column name: <column_name>. Available columns: [list of valid columns]"
-  }
-  ```
-
-## Example Dataset
-
-Here’s a sample row from the dataset:
-
-```csv
-Exercise Name,Equipment,Variation,Utility,Mechanics,Force,Preparation,Execution,Target_Muscles,Synergist_Muscles,Stabilizer_Muscles,Antagonist_Muscles,Dynamic_Stabilizer_Muscles,Main_muscle,Difficulty (1-5),Secondary Muscles,parent_id
-Squat,Barbell,Back Squat,Strength,Compound,Push,"Stand with feet shoulder-width apart",Lower the barbell to a full squat position,Quadriceps,Hamstrings,Core,Lower Back,Hip Flexors,Quadriceps,4,Hamstrings,2
-```
-
-## Additional Information
-
-- **Project Structure**:
-  - `app.py`: The main FastAPI application.
-  - `gym_exercise_dataset.csv`: The dataset file containing all exercises.
-  
-- **Dependencies**:
-  - `fastapi`: The web framework.
-  - `pandas`: Used for CSV data handling.
-  - `hypercorn`: The ASGI server used to run the FastAPI application.
+- Browse and search hundreds of exercises.
+- Filter by muscle, equipment, difficulty, or searchable field.
+- Read preparation and execution instructions.
+- Favorite exercises for quick reference.
+- Build named workouts.
+- Add exercises from Browse directly into a selected workout.
+- Start a live workout session.
+- Log reps and weight for each set.
+- Finish sessions and preserve workout history.
+- Track training volume and estimated 1RM trends.
+- Compare two exercises side-by-side.
+- View exercise-database statistics and terminal-native charts.
+- Use the same data from the CLI.
+- Run the optional REST API with FastAPI/Docker.
 
 ---
 
-This `README.md` now contains all the relevant details on how to use the API, including querying options and available headers. Let me know if you need further modifications!
+# Installation
+
+## 1. Create a virtual environment
+
+From the project directory:
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+```
+
+On every new terminal session, reactivate it with:
+
+```bash
+source .venv/bin/activate
+```
+
+## 2. Install ExerxEye
+
+```bash
+python -m pip install -U pip
+python -m pip install -e .
+```
+
+## 3. Import the exercise dataset
+
+```bash
+exerx-eye import data/gym_exercise_dataset.csv
+```
+
+If the database already contains the dataset, the importer may report:
+
+```text
+Imported 0 exercises
+```
+
+That normally means duplicate exercises were skipped rather than the import failing.
+
+## 4. Launch the TUI
+
+```bash
+exerx-eye tui
+```
+
+You can also inspect the available CLI commands with:
+
+```bash
+exerx-eye --help
+```
+
+---
+
+# TUI overview
+
+The interface contains these tabs:
+
+```text
+Browse
+Muscles
+Random
+Workouts
+Progress
+Statistics
+Compare
+System
+```
+
+The footer also displays the most important keyboard shortcuts.
+
+---
+
+# Browse
+
+The **Browse** tab is the main exercise explorer.
+
+You can:
+
+- Type in the search field.
+- Choose which field to search.
+- Filter by equipment.
+- Filter by muscle.
+- Filter by difficulty.
+- Highlight a result to view the full exercise details.
+
+The detail pane shows information such as:
+
+- exercise name
+- main muscle
+- equipment
+- difficulty
+- mechanics
+- force
+- target muscles
+- secondary muscles
+- preparation
+- execution instructions
+
+## Browse keyboard controls
+
+```text
+↑ / ↓     Move through exercises
+/         Focus the search box
+A         Add selected exercise to the active workout
+X         Add selected exercise to Compare
+F         Toggle favorite
+C         Clear filters
+E         Export
+R         Generate one random exercise
+6         Generate six random exercises
+Q         Quit
+```
+
+---
+
+# Creating a workout
+
+The workout builder uses a two-part workflow:
+
+1. Create/select the workout in **Workouts**.
+2. Add exercises to it from **Browse**.
+
+This is intentional: Browse remains the searchable exercise catalog, while Workouts remains the planning/logging screen.
+
+## Step 1 — Create a workout
+
+Open the **Workouts** tab.
+
+In the workout-name field, enter something like:
+
+```text
+Push Day
+```
+
+Then activate:
+
+```text
+Create Workout
+```
+
+The workout appears in the workout list.
+
+## Step 2 — Select the workout
+
+Highlight your new workout in the left-side workout list.
+
+This makes it the active workout.
+
+## Step 3 — Add exercises
+
+Go back to **Browse**.
+
+Highlight an exercise such as:
+
+```text
+Bench Press
+```
+
+Press:
+
+```text
+A
+```
+
+The selected exercise is added to the active workout.
+
+Repeat this for every exercise you want.
+
+Example:
+
+```text
+Push Day
+
+Bench Press
+Incline Dumbbell Press
+Overhead Press
+Lateral Raise
+Tricep Pushdown
+```
+
+## Step 4 — Review the workout
+
+Return to **Workouts**.
+
+Select the workout again.
+
+The middle table shows its exercises and programmed set/rep targets.
+
+---
+
+# Logging a workout session
+
+Once a workout contains exercises:
+
+## 1. Select the workout
+
+Highlight the workout in the workout list.
+
+## 2. Start the session
+
+Activate:
+
+```text
+Start Session
+```
+
+The status panel indicates that a live session is active.
+
+## 3. Select an exercise
+
+Highlight an exercise in the workout-exercise table.
+
+## 4. Enter reps and weight
+
+Use the input fields for:
+
+```text
+Reps
+Weight
+```
+
+Example:
+
+```text
+Reps:   8
+Weight: 135
+```
+
+## 5. Log the set
+
+Activate:
+
+```text
+Log Set
+```
+
+Repeat for every completed set.
+
+For example:
+
+```text
+Bench Press
+Set 1: 135 × 8
+Set 2: 135 × 8
+Set 3: 135 × 7
+Set 4: 135 × 6
+```
+
+## 6. Finish the session
+
+When the workout is complete, activate:
+
+```text
+Finish Session
+```
+
+The session is saved and becomes part of your progress history.
+
+---
+
+# Progress
+
+The **Progress** tab uses your logged workout sets.
+
+It shows:
+
+- date/time
+- workout
+- exercise
+- reps
+- weight
+- volume
+- estimated 1RM
+
+The right panel contains terminal-native trend plots.
+
+## Volume
+
+Set volume is calculated from:
+
+```text
+weight × reps
+```
+
+Logged sets contribute to the overall volume trend.
+
+## Estimated 1RM
+
+When weight is greater than zero, ExerxEye calculates an estimated one-repetition maximum for trend analysis.
+
+The progress display is intended to show direction over time rather than replace professional programming or medical advice.
+
+If the Progress tab is empty, complete at least one workout session with logged sets.
+
+---
+
+# Compare
+
+The **Compare** tab compares exactly two selected exercises.
+
+## How to select exercises
+
+Go to **Browse**.
+
+Highlight the first exercise and press:
+
+```text
+X
+```
+
+Highlight the second exercise and press:
+
+```text
+X
+```
+
+Now open **Compare**.
+
+You will see the exercises side-by-side.
+
+Comparison fields include:
+
+```text
+Exercise
+Main muscle
+Equipment
+Difficulty
+Mechanics
+Force
+Utility
+Targets
+Secondary muscles
+Preparation
+```
+
+If the Compare page is empty, no exercises have been selected yet.
+
+---
+
+# Random
+
+The **Random** tab is useful for discovery or workout inspiration.
+
+Keyboard commands:
+
+```text
+R     Generate one random exercise
+6     Generate six random exercises
+```
+
+You can optionally filter random selection by muscle.
+
+After selecting a random result:
+
+```text
+F     Favorite
+A     Add to active workout
+X     Compare
+```
+
+---
+
+# Muscles
+
+The **Muscles** tab provides a muscle-first view of the dataset.
+
+Workflow:
+
+1. Select a muscle group in the left table.
+2. Select an exercise in the middle table.
+3. Read the full details in the right panel.
+
+This is useful when you know what muscle you want to train but do not yet know which exercise you want.
+
+---
+
+# Statistics
+
+The **Statistics** tab summarizes the exercise database.
+
+It includes terminal-native bar charts for:
+
+- difficulty distribution
+- exercises by main muscle
+- top equipment
+
+It also displays headline values including:
+
+```text
+Total exercises
+Unique exercise names
+Equipment types
+Muscle groups
+Favorites
+Average difficulty
+```
+
+The bars are rendered directly in the terminal and do not require a separate plotting window.
+
+---
+
+# Favorites
+
+Highlight an exercise and press:
+
+```text
+F
+```
+
+A star indicates that the exercise is favorited.
+
+Favorites are stored in SQLite and persist between sessions.
+
+---
+
+# Search
+
+Simple search:
+
+```text
+bench press
+```
+
+The search field also supports structured filters in builds where advanced query syntax is enabled.
+
+Examples:
+
+```text
+muscle:Chest
+equipment:Dumbbell
+muscle:Chest equipment:Dumbbell
+muscle:Chest difficulty:3
+muscle:Chest -equipment:Machine
+```
+
+You can also use the visible dropdown filters without learning query syntax.
+
+---
+
+# Keyboard reference
+
+```text
+Q       Quit
+/       Focus search
+R       One random exercise
+6       Six random exercises
+F       Favorite selected exercise
+A       Add selected exercise to active workout
+X       Select exercise for comparison
+E       Export
+C       Clear filters
+↑/↓     Navigate tables
+Tab     Move focus between controls
+Enter   Activate focused buttons/controls
+```
+
+---
+
+# CLI usage
+
+ExerxEye can also be used without launching the TUI.
+
+## Search
+
+```bash
+exerx-eye search "bench press"
+```
+
+## Random exercise
+
+```bash
+exerx-eye random --muscle Chest --count 1
+```
+
+Six exercises:
+
+```bash
+exerx-eye random --muscle Chest --count 6
+```
+
+## Statistics
+
+```bash
+exerx-eye stats
+```
+
+## Health check
+
+```bash
+exerx-eye doctor
+```
+
+## Export
+
+```bash
+exerx-eye export exercises.csv
+```
+
+## Launch TUI
+
+```bash
+exerx-eye tui
+```
+
+---
+
+# Local data
+
+ExerxEye stores its local SQLite data in the application data directory.
+
+The branded build uses an ExerxEye-specific data location/database rather than requiring the CSV every time the TUI launches.
+
+Use:
+
+```bash
+exerx-eye doctor
+```
+
+to check database health and record counts.
+
+---
+
+# API
+
+ExerxEye also includes an optional FastAPI service for programmatic access.
+
+Typical routes include:
+
+```text
+GET /health
+GET /exercises
+GET /exercises/{id}
+GET /random
+GET /muscles
+GET /stats
+```
+
+The API is not required to use the TUI.
+
+---
+
+# Docker
+
+To launch the API container:
+
+```bash
+docker compose up --build -d
+```
+
+Check containers:
+
+```bash
+docker compose ps
+```
+
+Test health:
+
+```bash
+curl http://localhost:8000/health
+```
+
+Swagger/OpenAPI documentation is available at:
+
+```text
+http://localhost:8000/docs
+```
+
+Stop the service with:
+
+```bash
+docker compose down
+```
+
+---
+
+# Testing
+
+Install pytest if necessary:
+
+```bash
+python -m pip install pytest
+```
+
+Then run:
+
+```bash
+python -m pytest -q
+```
+
+---
+
+# Troubleshooting
+
+## `exerx-eye: command not found`
+
+Make sure the project is installed into the active environment:
+
+```bash
+source .venv/bin/activate
+python -m pip install -e .
+```
+
+Check:
+
+```bash
+which exerx-eye
+```
+
+## Wrong virtual environment
+
+Check:
+
+```bash
+which python
+```
+
+The path should point inside the current ExerxEye project:
+
+```text
+.../exerx-eye/.venv/bin/python
+```
+
+If it points to another project:
+
+```bash
+deactivate
+cd ~/Downloads/exerx-eye
+source .venv/bin/activate
+```
+
+## Empty exercise database
+
+Run:
+
+```bash
+exerx-eye import data/gym_exercise_dataset.csv
+```
+
+## Import says `Imported 0 exercises`
+
+The exercises are probably already present.
+
+Run:
+
+```bash
+exerx-eye stats
+```
+
+or:
+
+```bash
+exerx-eye doctor
+```
+
+to verify the database count.
+
+## Compare is empty
+
+Go to Browse and press `X` on two exercises.
+
+## Workout has no exercises
+
+Select the workout first, go to Browse, highlight an exercise, and press `A`.
+
+## Progress has no data
+
+Create a workout, start a session, log at least one weighted set, and finish the session.
+
+---
+
+# Architecture
+
+```text
+Exercise Dataset
+      │
+      ▼
+SQLite Repository
+      │
+      ├── Exercise Search
+      ├── Favorites
+      ├── Workouts
+      │      └── Sessions
+      │             └── Sets
+      │                    └── Progress Analytics
+      │
+      ├── Textual TUI
+      ├── CLI
+      └── FastAPI REST service
+```
+
+The TUI does not require the API to be running. SQLite is the local source of truth for the terminal application.
+
+---
+
+# Product naming
+
+```text
+Product        ExerxEye
+Tagline        Exercise Intelligence & Analytics
+CLI            exerx-eye
+Python package exerx_eye
+```
+
+---
+
+# License
+
+See the repository license for distribution and reuse terms.
