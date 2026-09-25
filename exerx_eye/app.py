@@ -261,7 +261,7 @@ class ExerciseTUI(App):
 
     def refresh_system(self) -> None:
         h=self.db.health(); size=h["db_size_bytes"]/1024
-        self.query_one("#system-view", Static).update(f"""[b]SYSTEM STATUS[/b]\n\nDatabase        [b green]● {h['database']}[/b green]\nSQLite latency  [b]{h['latency_ms']} ms[/b]\nDatabase size   [b]{size:,.1f} KB[/b]\nExercises       [b]{h['exercises']}[/b]\nWorkouts        [b]{h['workouts']}[/b]\nCompleted       [b]{h['sessions']} sessions[/b]\nLogged sets     [b]{h['sets']}[/b]\nSchema version  [b]{self.db.schema_version()}[/b]\n\n[b]ARCHITECTURE[/b]\n\nExercise CSV ──► SQLite Repository ──► Textual TUI\n                    │\n                    ├──► Workouts ─► Sessions ─► Sets ─► Progress\n                    │\n                    └──► FastAPI REST service ─► Docker\n\n[s dim]Run `exerx-eye doctor` for the same checks from the shell.[/s dim]""")
+        self.query_one("#system-view", Static).update(f"""[b]SYSTEM STATUS[/b]\n\nDatabase        [b green]● {h['database']}[/b green]\nSQLite latency  [b]{h['latency_ms']} ms[/b]\nDatabase size   [b]{size:,.1f} KB[/b]\nExercises       [b]{h['exercises']}[/b]\nWorkouts        [b]{h['workouts']}[/b]\nCompleted       [b]{h['sessions']} sessions[/b]\nLogged sets     [b]{h['sets']}[/b]\nSchema version  [b]{self.db.schema_version()}[/b]\n\n[b]ARCHITECTURE[/b]\n\nExercise CSV ──► SQLite Repository ──► Textual TUI\n                    │\n                    ├──► Workouts ─► Sessions ─► Sets ─► Progress\n                    │\n                    └──► Flask web + JSON service ─► Docker\n\n[s dim]Run `exerx-eye doctor` for the same checks from the shell.[/s dim]""")
 
     @staticmethod
     def detail_markup(e: Exercise) -> str:

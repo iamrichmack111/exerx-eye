@@ -4,11 +4,11 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "ExerxEye"
-version = "1.0.2"
-description = "Terminal-first exercise intelligence, workout tracking, and progress analytics platform."
-readme = "README-TUI.md"
+version = "1.2.0"
+description = "Flask exercise intelligence with private accounts, workout tracking, motion UI, analytics, and exports."
+readme = "README.md"
 requires-python = ">=3.10"
-dependencies = ["textual>=0.70", "rich>=13.7"]
+dependencies = ["textual>=0.70", "rich>=13.7", "Flask>=3.0,<4"]
 authors = [{name = "Jeremy Franklin"}]
 license = {text = "MIT"}
 keywords = ["textual", "sqlite", "fitness", "tui", "exercise"]

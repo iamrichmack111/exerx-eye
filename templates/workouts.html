@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block title %}Workouts · ExerxEye{% endblock %}
+{% block utility_title %}Workout planning{% endblock %}
+{% block content %}
+<section class="page-header reveal">
+  <div><span class="eyebrow">Train</span><h1>Workouts</h1><p>Create plans manually or generate a balanced starting point in a few seconds.</p></div>
+  <span class="header-count">{{ workouts|length }} saved plan{% if workouts|length != 1 %}s{% endif %}</span>
+</section>
+
+<section class="generator-panel panel reveal" id="generator">
+  <div class="generator-copy">
+    <span class="eyebrow">Quick build</span>
+    <h2>Generate a workout</h2>
+    <p>Choose a training focus and ExerxEye will assemble a balanced draft from your exercise library. You can edit every target before training.</p>
+  </div>
+  <form method="post" action="{{ url_for('generate_workout') }}" class="generator-form" id="generator-form">
+    <label class="field"><span>Focus</span><select name="preset" id="generator-preset"><option value="full_body">Full body</option><option value="upper">Upper body</option><option value="lower">Lower body</option><option value="push">Push</option><option value="pull">Pull</option><option value="custom">Single muscle</option></select></label>
+    <label class="field generator-custom" id="generator-custom" hidden><span>Muscle</span><select name="muscle"><option value="All">Any muscle</option>{% for option in muscle_options %}<option value="{{ option }}">{{ option }}</option>{% endfor %}</select></label>
+    <label class="field"><span>Equipment</span><select name="equipment"><option value="All">Any equipment</option>{% for option in equipment_options %}<option value="{{ option }}">{{ option }}</option>{% endfor %}</select></label>
+    <label class="field"><span>Exercises</span><select name="count">{% for n in range(3,11) %}<option value="{{ n }}" {% if n == 6 %}selected{% endif %}>{{ n }}</option>{% endfor %}</select></label>
+    <label class="field generator-name"><span>Name <small>optional</small></span><input name="name" placeholder="Auto name"></label>
+    <button class="btn btn-primary" type="submit">Generate plan</button>
+  </form>
+  <div class="generator-presets" aria-label="Generator presets">
+    <button type="button" data-generator-preset="full_body">Full body</button><button type="button" data-generator-preset="push">Push</button><button type="button" data-generator-preset="pull">Pull</button><button type="button" data-generator-preset="lower">Lower</button>
+  </div>
+</section>
+
+<section class="workout-organizer section-block">
+  <aside class="panel create-panel reveal">
+    <div class="panel-heading"><div><span class="eyebrow">Manual build</span><h2>New workout</h2></div></div>
+    <form method="post" class="stack-form">
+      <label class="field"><span>Workout name</span><input name="name" required placeholder="Push day"></label>
+      <label class="field"><span>Training notes</span><textarea name="notes" rows="5" placeholder="Goal, tempo, focus, constraints…"></textarea></label>
+      <button class="btn btn-secondary">Create empty plan</button>
+    </form>
+    <div class="panel-tip"><strong>Organize once.</strong><span>Build reusable plans here, then place them on specific days in the weekly planner.</span></div>
+    <a class="text-link panel-footer-link" href="{{ url_for('planner') }}">Open weekly planner ↗</a>
+  </aside>
+
+  <section class="workout-library">
+    <div class="section-heading reveal"><div><span class="eyebrow">Saved plans</span><h2>Your workout library</h2></div><a class="text-link" href="{{ url_for('index') }}">Browse exercises ↗</a></div>
+    <div class="workout-card-grid stagger-grid">
+      {% for w in workouts %}
+      <article class="saved-workout-card panel reveal">
+        <a class="saved-workout-main" href="{{ url_for('workout_detail', workout_id=w['id']) }}">
+          <span class="workout-number">{{ '%02d'|format(loop.index) }}</span>
+          <div><strong>{{ w['name'] }}</strong><small>{{ w['exercise_count'] }} exercise{% if w['exercise_count'] != 1 %}s{% endif %}</small></div>
+          <span class="saved-workout-arrow">↗</span>
+        </a>
+        {% if w['notes'] %}<p>{{ w['notes'] }}</p>{% else %}<p class="muted">No notes added.</p>{% endif %}
+        <div class="saved-workout-actions">
+          <form method="post" action="{{ url_for('start_session', workout_id=w['id']) }}"><button class="btn btn-primary btn-small">Start</button></form>
+          <form method="post" action="{{ url_for('duplicate_workout', workout_id=w['id']) }}"><button class="mini-action">Duplicate</button></form>
+          <form method="post" action="{{ url_for('delete_workout', workout_id=w['id']) }}" data-confirm="Delete this workout?"><button class="mini-action danger">Delete</button></form>
+        </div>
+      </article>
+      {% else %}
+      <div class="empty-state"><span>No plans yet</span><h3>Generate one or build one manually.</h3><p>Your saved workouts will stay organized here.</p></div>
+      {% endfor %}
+    </div>
+  </section>
+</section>
+{% endblock %}

@@ -1,0 +1,15 @@
+{% extends "auth_base.html" %}
+{% block title %}Create account · ExerxEye{% endblock %}
+{% block hero_title %}Make your training data yours.{% endblock %}
+{% block hero_copy %}Create a local profile with just a username and password. Favorites, workout plans, sessions, and exports stay separate for each account.{% endblock %}
+{% block form %}
+<div class="auth-card-head"><span class="eyebrow">Create profile</span><h2>Sign up</h2><p>Username and password only. Your account is local to this ExerxEye install.</p></div>
+<form method="post" class="auth-form" data-signup-form>
+  {% if next_url %}<input type="hidden" name="next" value="{{ next_url }}">{% endif %}
+  <label class="field"><span>Username</span><input name="username" autocomplete="username" required minlength="3" placeholder="richmack" autofocus></label>
+  <label class="field"><span>Password</span><div class="password-field"><input id="signup-password" name="password" type="password" autocomplete="new-password" required minlength="8" placeholder="At least 8 characters"><button type="button" class="password-toggle" data-password-toggle="#signup-password">Show</button></div><div class="password-strength"><i id="password-strength-bar"></i></div><small id="password-strength-copy">Use 8+ characters with a mix of letters, numbers, or symbols.</small></label>
+  <label class="field"><span>Confirm password</span><div class="password-field"><input id="signup-confirm" name="confirm_password" type="password" autocomplete="new-password" required placeholder="Repeat password"><span class="password-match" id="password-match"></span></div></label>
+  <button class="btn btn-primary auth-submit" type="submit"><span>Create account</span><b>→</b></button>
+</form>
+<div class="auth-switch"><span>Already have an account?</span><a href="{{ url_for('login', next=next_url or '') }}">Log in</a></div>
+{% endblock %}

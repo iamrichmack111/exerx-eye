@@ -1,736 +1,193 @@
 # ExerxEye
 
-**Exercise Intelligence & Analytics**
+<!-- EXERXEYE-GITHUB:START -->
 
-ExerxEye is a terminal-first exercise discovery, workout-building, and training-progress application. It combines a searchable exercise database with workout planning, set logging, comparison tools, favorites, analytics, progress trends, a CLI, and an optional FastAPI service.
+[![CI + Playwright](https://github.com/iamrichmack111/exerx-eye/actions/workflows/ci.yml/badge.svg)](https://github.com/iamrichmack111/exerx-eye/actions/workflows/ci.yml)
+[![Python](https://img.shields.io/badge/Python-3.12+-3776AB?logo=python&logoColor=white)](https://python.org)
+[![Flask](https://img.shields.io/badge/Flask-Web_App-000000?logo=flask&logoColor=white)](https://flask.palletsprojects.com/)
+[![Playwright](https://img.shields.io/badge/Tested_with-Playwright-2EAD33?logo=playwright)](https://playwright.dev/)
+![SQLite](https://img.shields.io/badge/SQLite-003B57?logo=sqlite&logoColor=white)
+![PWA](https://img.shields.io/badge/PWA-Ready-5A0FC8?logo=pwa)
+![Dark Mode](https://img.shields.io/badge/Dark_Mode-Ready-111111)
 
----
+## Screenshots
 
-## What ExerxEye does
+### Exercise Library
 
-ExerxEye gives you several ways to work with the exercise dataset:
+![ExerxEye Exercise Library](screenshots/01-exercises.png)
 
-- Browse and search hundreds of exercises.
-- Filter by muscle, equipment, difficulty, or searchable field.
-- Read preparation and execution instructions.
-- Favorite exercises for quick reference.
-- Build named workouts.
-- Add exercises from Browse directly into a selected workout.
-- Start a live workout session.
-- Log reps and weight for each set.
-- Finish sessions and preserve workout history.
-- Track training volume and estimated 1RM trends.
-- Compare two exercises side-by-side.
-- View exercise-database statistics and terminal-native charts.
-- Use the same data from the CLI.
-- Run the optional REST API with FastAPI/Docker.
+### Login
 
----
+![ExerxEye Login](screenshots/02-login.png)
 
-# Installation
+### Signup
 
-## 1. Create a virtual environment
+![ExerxEye Signup](screenshots/03-signup.png)
 
-From the project directory:
+<!-- EXERXEYE-GITHUB:END -->
+
+ExerxEye is a Flask exercise intelligence and training workspace backed by SQLite. It combines a searchable exercise library with private user accounts, favorites, workout planning, live session logging, analytics, exports, and a motion-rich responsive interface.
+
+## New in this build
+
+### V7 planning and session review
+
+- **Weekly Planner**: assign saved workouts to Monday-Sunday and keep recovery/flexible days open.
+- **Today-aware Quick Start**: Home prioritizes the workout scheduled for the current day.
+- **Active-session recovery**: unfinished sessions are surfaced on Home and starting another workout routes you back to the active one.
+- **One active session at a time** to prevent accidental duplicate workout logs.
+- **Training preferences**: set a weekly session goal and default rest timer from Account.
+- **Weekly goal meter** on Home and Planner.
+- **Post-workout review screen** with duration, working sets, exercises, total volume, average RIR, top estimated 1RM, and per-exercise breakdown.
+- **Session RPE + session note** for a lightweight after-workout reflection.
+- **Session summaries are reusable history**: recent completed workouts link back to their review screen.
+- **Full account JSON now includes preferences, weekly schedule, and reviewed sessions.**
+- **Schema v6 migration** adds planning preferences, schedule mapping, and session review fields without resetting existing user data.
+
+### V6 product improvements
+
+- **Training Home** after login with 7-day sessions/sets/volume, 30-day activity, quick-start, recent sessions, and current estimated-1RM bests.
+- **Editable workout plans**: rename plans, edit notes, change sets/reps/target weight, and reorder exercises before training.
+- **RIR + set notes**: optionally log repetitions-in-reserve and a short note with each set.
+- **Smarter active sessions**: already-logged sets appear under each movement and the rest timer auto-starts after a set is recorded.
+- **Progress ranges and charts** for 7, 30, 90, and 365 days with animated daily-volume bars and a PR board.
+- **Exercise history**: recent personal performance is visible on each exercise page and the workout-builder weight field pre-fills from the last logged set.
+- **Installable PWA shell** with cached static assets for faster repeat loads.
+- **Schema v5 migration** automatically adds effort/note fields to existing SQLite databases; V7 advances existing databases to schema v6 for planning/review data.
+
+
+- **Signup / login / logout** with securely hashed passwords.
+- **Private per-user data**: favorites, workouts, sessions, logged sets, progress, and exports are isolated by account.
+- **Account dashboard** with training totals and quick actions.
+- **Export center** with:
+  - Progress history CSV
+  - Workout plans CSV
+  - Favorites CSV
+  - Full account JSON bundle
+  - Exercise-library CSV
+- **More motion**: route transitions, animated ambient backgrounds, reveal/stagger effects, button ripples, card perspective tilt, progress animation, auth-page orbit animation, export-card shimmer, and a workout-completion celebration.
+- Password strength and confirmation feedback on signup.
+- Existing exercise comparison, command palette, themes, rest timer, personal bests, and related-exercise tools remain included.
+- `prefers-reduced-motion` is respected.
+
+## Fastest way to run
+
+```bash
+chmod +x run.sh
+./run.sh
+```
+
+The launcher creates `.venv`, installs missing dependencies, generates a persistent local Flask secret in `instance/.secret`, and starts the app at:
+
+```text
+http://127.0.0.1:8000
+```
+
+## Manual setup
 
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
+pip install -r requirements.txt
+export EXERXEYE_SECRET="$(python -c 'import secrets; print(secrets.token_hex(32))')"
+python app.py
 ```
 
-On every new terminal session, reactivate it with:
+## Accounts and privacy
+
+Exercise browsing and the public library API work without an account. Saving favorites, creating workouts, logging sets, viewing personal progress, opening the account dashboard, and private exports require login.
+
+Passwords are stored as Werkzeug password hashes; plaintext passwords are not stored. For a deployed copy, set a strong persistent `EXERXEYE_SECRET` environment variable.
+
+## Export center
+
+After login, open **Insights → Export center** or visit `/exports`.
+
+| Export | Format | Contents |
+| --- | --- | --- |
+| Progress history | CSV | exercise, workout, reps, weight, volume, estimated 1RM, RIR, note, date |
+| Workout plans | CSV | workout notes, exercises, sets, reps, target weights |
+| Favorites | CSV | saved exercises and movement metadata |
+| Full account | JSON | account metadata, favorites, workouts, progress, preferences, weekly schedule, session reviews |
+| Exercise library | CSV | public core movement database |
+
+## Training features
+
+- Search/filter exercises by muscle, equipment, difficulty, and text query.
+- Favorite movements per account.
+- Compare up to three exercises side-by-side.
+- Create, duplicate, and delete workout plans.
+- Add/remove/reorder exercises and edit target sets, reps, and weight.
+- Start sessions and log live sets with optional RIR and set notes.
+- 30/45/60/90/120-second persistent rest timer with a user-selected default.
+- Session completion percentage, remaining sets, and volume.
+- Personal bests, total volume, estimated 1RM, date-range progress filtering, and animated volume trends.
+- Random exercise generator and library analytics.
+- JSON API under `/api/*` plus `/health`.
+
+## Interface shortcuts
+
+- `Ctrl/Cmd + K` — command palette
+- `/` — focus global exercise search
+- `R` — randomizer
+- Light/Dark mode toggle — follows system preference the first time and remembers your choice
+
+## Production-style run
+
+```bash
+export EXERXEYE_SECRET="replace-with-a-long-random-secret"
+gunicorn --bind 0.0.0.0:8000 --workers 1 --threads 4 app:app
+```
+
+SQLite is intentionally served with one Gunicorn worker and multiple threads to avoid multiple worker processes racing on the same local database file.
+
+## Docker
+
+```bash
+docker compose up --build
+```
+
+For a deployed Docker instance, pass a persistent secret, for example:
+
+```bash
+EXERXEYE_SECRET="your-long-random-secret" docker compose up --build
+```
+
+## Tests
 
 ```bash
 source .venv/bin/activate
-```
-
-## 2. Install ExerxEye
-
-```bash
-python -m pip install -U pip
-python -m pip install -e .
-```
-
-## 3. Import the exercise dataset
-
-```bash
-exerx-eye import data/gym_exercise_dataset.csv
-```
-
-If the database already contains the dataset, the importer may report:
-
-```text
-Imported 0 exercises
-```
-
-That normally means duplicate exercises were skipped rather than the import failing.
-
-## 4. Launch the TUI
-
-```bash
-exerx-eye tui
-```
-
-You can also inspect the available CLI commands with:
-
-```bash
-exerx-eye --help
-```
-
----
-
-# TUI overview
-
-The interface contains these tabs:
-
-```text
-Browse
-Muscles
-Random
-Workouts
-Progress
-Statistics
-Compare
-System
-```
-
-The footer also displays the most important keyboard shortcuts.
-
----
-
-# Browse
-
-The **Browse** tab is the main exercise explorer.
-
-You can:
-
-- Type in the search field.
-- Choose which field to search.
-- Filter by equipment.
-- Filter by muscle.
-- Filter by difficulty.
-- Highlight a result to view the full exercise details.
-
-The detail pane shows information such as:
-
-- exercise name
-- main muscle
-- equipment
-- difficulty
-- mechanics
-- force
-- target muscles
-- secondary muscles
-- preparation
-- execution instructions
-
-## Browse keyboard controls
-
-```text
-↑ / ↓     Move through exercises
-/         Focus the search box
-A         Add selected exercise to the active workout
-X         Add selected exercise to Compare
-F         Toggle favorite
-C         Clear filters
-E         Export
-R         Generate one random exercise
-6         Generate six random exercises
-Q         Quit
-```
-
----
-
-# Creating a workout
-
-The workout builder uses a two-part workflow:
-
-1. Create/select the workout in **Workouts**.
-2. Add exercises to it from **Browse**.
-
-This is intentional: Browse remains the searchable exercise catalog, while Workouts remains the planning/logging screen.
-
-## Step 1 — Create a workout
-
-Open the **Workouts** tab.
-
-In the workout-name field, enter something like:
-
-```text
-Push Day
-```
-
-Then activate:
-
-```text
-Create Workout
-```
-
-The workout appears in the workout list.
-
-## Step 2 — Select the workout
-
-Highlight your new workout in the left-side workout list.
-
-This makes it the active workout.
-
-## Step 3 — Add exercises
-
-Go back to **Browse**.
-
-Highlight an exercise such as:
-
-```text
-Bench Press
-```
-
-Press:
-
-```text
-A
-```
-
-The selected exercise is added to the active workout.
-
-Repeat this for every exercise you want.
-
-Example:
-
-```text
-Push Day
-
-Bench Press
-Incline Dumbbell Press
-Overhead Press
-Lateral Raise
-Tricep Pushdown
-```
-
-## Step 4 — Review the workout
-
-Return to **Workouts**.
-
-Select the workout again.
-
-The middle table shows its exercises and programmed set/rep targets.
-
----
-
-# Logging a workout session
-
-Once a workout contains exercises:
-
-## 1. Select the workout
-
-Highlight the workout in the workout list.
-
-## 2. Start the session
-
-Activate:
-
-```text
-Start Session
-```
-
-The status panel indicates that a live session is active.
-
-## 3. Select an exercise
-
-Highlight an exercise in the workout-exercise table.
-
-## 4. Enter reps and weight
-
-Use the input fields for:
-
-```text
-Reps
-Weight
-```
-
-Example:
-
-```text
-Reps:   8
-Weight: 135
-```
-
-## 5. Log the set
-
-Activate:
-
-```text
-Log Set
-```
-
-Repeat for every completed set.
-
-For example:
-
-```text
-Bench Press
-Set 1: 135 × 8
-Set 2: 135 × 8
-Set 3: 135 × 7
-Set 4: 135 × 6
-```
-
-## 6. Finish the session
-
-When the workout is complete, activate:
-
-```text
-Finish Session
-```
-
-The session is saved and becomes part of your progress history.
-
----
-
-# Progress
-
-The **Progress** tab uses your logged workout sets.
-
-It shows:
-
-- date/time
-- workout
-- exercise
-- reps
-- weight
-- volume
-- estimated 1RM
-
-The right panel contains terminal-native trend plots.
-
-## Volume
-
-Set volume is calculated from:
-
-```text
-weight × reps
-```
-
-Logged sets contribute to the overall volume trend.
-
-## Estimated 1RM
-
-When weight is greater than zero, ExerxEye calculates an estimated one-repetition maximum for trend analysis.
-
-The progress display is intended to show direction over time rather than replace professional programming or medical advice.
-
-If the Progress tab is empty, complete at least one workout session with logged sets.
-
----
-
-# Compare
-
-The **Compare** tab compares exactly two selected exercises.
-
-## How to select exercises
-
-Go to **Browse**.
-
-Highlight the first exercise and press:
-
-```text
-X
-```
-
-Highlight the second exercise and press:
-
-```text
-X
-```
-
-Now open **Compare**.
-
-You will see the exercises side-by-side.
-
-Comparison fields include:
-
-```text
-Exercise
-Main muscle
-Equipment
-Difficulty
-Mechanics
-Force
-Utility
-Targets
-Secondary muscles
-Preparation
-```
-
-If the Compare page is empty, no exercises have been selected yet.
-
----
-
-# Random
-
-The **Random** tab is useful for discovery or workout inspiration.
-
-Keyboard commands:
-
-```text
-R     Generate one random exercise
-6     Generate six random exercises
-```
-
-You can optionally filter random selection by muscle.
-
-After selecting a random result:
-
-```text
-F     Favorite
-A     Add to active workout
-X     Compare
-```
-
----
-
-# Muscles
-
-The **Muscles** tab provides a muscle-first view of the dataset.
-
-Workflow:
-
-1. Select a muscle group in the left table.
-2. Select an exercise in the middle table.
-3. Read the full details in the right panel.
-
-This is useful when you know what muscle you want to train but do not yet know which exercise you want.
-
----
-
-# Statistics
-
-The **Statistics** tab summarizes the exercise database.
-
-It includes terminal-native bar charts for:
-
-- difficulty distribution
-- exercises by main muscle
-- top equipment
-
-It also displays headline values including:
-
-```text
-Total exercises
-Unique exercise names
-Equipment types
-Muscle groups
-Favorites
-Average difficulty
-```
-
-The bars are rendered directly in the terminal and do not require a separate plotting window.
-
----
-
-# Favorites
-
-Highlight an exercise and press:
-
-```text
-F
-```
-
-A star indicates that the exercise is favorited.
-
-Favorites are stored in SQLite and persist between sessions.
-
----
-
-# Search
-
-Simple search:
-
-```text
-bench press
-```
-
-The search field also supports structured filters in builds where advanced query syntax is enabled.
-
-Examples:
-
-```text
-muscle:Chest
-equipment:Dumbbell
-muscle:Chest equipment:Dumbbell
-muscle:Chest difficulty:3
-muscle:Chest -equipment:Machine
-```
-
-You can also use the visible dropdown filters without learning query syntax.
-
----
-
-# Keyboard reference
-
-```text
-Q       Quit
-/       Focus search
-R       One random exercise
-6       Six random exercises
-F       Favorite selected exercise
-A       Add selected exercise to active workout
-X       Select exercise for comparison
-E       Export
-C       Clear filters
-↑/↓     Navigate tables
-Tab     Move focus between controls
-Enter   Activate focused buttons/controls
-```
-
----
-
-# CLI usage
-
-ExerxEye can also be used without launching the TUI.
-
-## Search
-
-```bash
-exerx-eye search "bench press"
-```
-
-## Random exercise
-
-```bash
-exerx-eye random --muscle Chest --count 1
-```
-
-Six exercises:
-
-```bash
-exerx-eye random --muscle Chest --count 6
-```
-
-## Statistics
-
-```bash
-exerx-eye stats
-```
-
-## Health check
-
-```bash
-exerx-eye doctor
-```
-
-## Export
-
-```bash
-exerx-eye export exercises.csv
-```
-
-## Launch TUI
-
-```bash
-exerx-eye tui
-```
-
----
-
-# Local data
-
-ExerxEye stores its local SQLite data in the application data directory.
-
-The branded build uses an ExerxEye-specific data location/database rather than requiring the CSV every time the TUI launches.
-
-Use:
-
-```bash
-exerx-eye doctor
-```
-
-to check database health and record counts.
-
----
-
-# API
-
-ExerxEye also includes an optional FastAPI service for programmatic access.
-
-Typical routes include:
-
-```text
-GET /health
-GET /exercises
-GET /exercises/{id}
-GET /random
-GET /muscles
-GET /stats
-```
-
-The API is not required to use the TUI.
-
----
-
-# Docker
-
-To launch the API container:
-
-```bash
-docker compose up --build -d
-```
-
-Check containers:
-
-```bash
-docker compose ps
-```
-
-Test health:
-
-```bash
-curl http://localhost:8000/health
-```
-
-Swagger/OpenAPI documentation is available at:
-
-```text
-http://localhost:8000/docs
-```
-
-Stop the service with:
-
-```bash
-docker compose down
-```
-
----
-
-# Testing
-
-Install pytest if necessary:
-
-```bash
-python -m pip install pytest
-```
-
-Then run:
-
-```bash
+pip install -r requirements-dev.txt
 python -m pytest -q
 ```
 
----
+The Flask tests cover signup/login, private workout flow, user-data isolation, exports, weekly planning, preferences, and session review routes. Database tests also cover schema migration v6, active-session handling, planner persistence, and export inclusion.
 
-# Troubleshooting
+## Environment variables
 
-## `exerx-eye: command not found`
+- `EXERCISE_DB_PATH` — SQLite path, default `instance/exercises.db`
+- `EXERCISE_CSV_PATH` — seed CSV, default `data/gym_exercise_dataset.csv`
+- `EXERXEYE_SECRET` — Flask session secret
+- `PORT` — Flask development port, default `8000`
+- `FLASK_DEBUG=1` — enable Flask debug mode
+## V8 account + appearance update
 
-Make sure the project is installed into the active environment:
+- **No email required:** sign up and log in with a username and password only.
+- **Dark mode:** a dedicated Light/Dark toggle appears in the main app and auth screens, follows the system preference on first use, and remembers the choice locally.
+- Existing databases remain compatible; legacy email values are retained internally only for migration compatibility and are no longer shown, used for login, or included in account exports.
 
-```bash
-source .venv/bin/activate
-python -m pip install -e .
-```
 
-Check:
+## V9 visual redesign
 
-```bash
-which exerx-eye
-```
+The V9 interface uses a single premium fitness design system with a restrained lime accent, cleaner cards, simpler navigation, reduced visual effects, stronger mobile layout, and a dedicated light/dark mode rather than multiple competing theme skins.
 
-## Wrong virtual environment
 
-Check:
+## V10 organization + training UX
 
-```bash
-which python
-```
-
-The path should point inside the current ExerxEye project:
-
-```text
-.../exerx-eye/.venv/bin/python
-```
-
-If it points to another project:
-
-```bash
-deactivate
-cd ~/Downloads/exerx-eye
-source .venv/bin/activate
-```
-
-## Empty exercise database
-
-Run:
-
-```bash
-exerx-eye import data/gym_exercise_dataset.csv
-```
-
-## Import says `Imported 0 exercises`
-
-The exercises are probably already present.
-
-Run:
-
-```bash
-exerx-eye stats
-```
-
-or:
-
-```bash
-exerx-eye doctor
-```
-
-to verify the database count.
-
-## Compare is empty
-
-Go to Browse and press `X` on two exercises.
-
-## Workout has no exercises
-
-Select the workout first, go to Browse, highlight an exercise, and press `A`.
-
-## Progress has no data
-
-Create a workout, start a session, log at least one weighted set, and finish the session.
-
----
-
-# Architecture
-
-```text
-Exercise Dataset
-      │
-      ▼
-SQLite Repository
-      │
-      ├── Exercise Search
-      ├── Favorites
-      ├── Workouts
-      │      └── Sessions
-      │             └── Sets
-      │                    └── Progress Analytics
-      │
-      ├── Textual TUI
-      ├── CLI
-      └── FastAPI REST service
-```
-
-The TUI does not require the API to be running. SQLite is the local source of truth for the terminal application.
-
----
-
-# Product naming
-
-```text
-Product        ExerxEye
-Tagline        Exercise Intelligence & Analytics
-CLI            exerx-eye
-Python package exerx_eye
-```
-
----
-
-# License
-
-See the repository license for distribution and reuse terms.
+- Navigation is grouped into **Home / Explore / Train / Track** so planning and analytics no longer compete as separate top-level tabs.
+- Home is organized into **Today**, **This Week**, **Insights**, and **Recent Activity**.
+- Training Home now shows current/best streaks, weekly completion, 30-day volume, and muscle-volume distribution.
+- Workout Generator can draft Full Body, Upper, Lower, Push, Pull, or single-muscle plans with optional equipment filtering.
+- Exercise Library remembers recently viewed movements locally in the browser.
+- Active sessions reuse the last logged reps/weight/RIR, provide ± rep/weight quick controls, mark completed exercises, and include a sticky **Next unfinished** action.
+- Motion is purposeful: staggered reveals, chart growth, weekly completion pulses, generator/navigation transitions, and workout focus feedback with reduced-motion support.

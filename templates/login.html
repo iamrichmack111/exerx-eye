@@ -1,0 +1,14 @@
+{% extends "auth_base.html" %}
+{% block title %}Log in · ExerxEye{% endblock %}
+{% block hero_title %}Pick up where you left off.{% endblock %}
+{% block hero_copy %}Your workouts, favorites, logged sets, and exports stay attached to your local username.{% endblock %}
+{% block form %}
+<div class="auth-card-head"><span class="eyebrow">Welcome back</span><h2>Log in</h2><p>Use your username and password.</p></div>
+<form method="post" class="auth-form">
+  {% if next_url %}<input type="hidden" name="next" value="{{ next_url }}">{% endif %}
+  <label class="field"><span>Username</span><input name="login" autocomplete="username" required autofocus placeholder="richmack"></label>
+  <label class="field"><span>Password</span><div class="password-field"><input id="login-password" name="password" type="password" autocomplete="current-password" required placeholder="Your password"><button type="button" class="password-toggle" data-password-toggle="#login-password">Show</button></div></label>
+  <button class="btn btn-primary auth-submit" type="submit"><span>Log in</span><b>→</b></button>
+</form>
+<div class="auth-switch"><span>New to ExerxEye?</span><a href="{{ url_for('signup', next=next_url or '') }}">Create an account</a></div>
+{% endblock %}

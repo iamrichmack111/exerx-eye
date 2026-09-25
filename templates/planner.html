@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}Weekly Planner · ExerxEye{% endblock %}
+{% block utility_title %}Weekly planner{% endblock %}
+{% block content %}
+<section class="planner-hero reveal">
+  <div>
+    <span class="eyebrow">Plan the week</span>
+    <h1>Give each training day a job.</h1>
+    <p>Assign one of your saved workouts to any day. Leave days open when you want recovery or flexibility.</p>
+  </div>
+  <div class="goal-orbit" style="--goal:{{ week_goal.percent }}%">
+    <div><strong>{{ week_goal.sessions }}/{{ week_goal.goal }}</strong><span>sessions this week</span></div>
+  </div>
+</section>
+
+<form method="post" class="planner-form section-block">
+  <div class="planner-week reveal">
+    {% for day in days %}
+      {% set planned = schedule.get(loop.index0) %}
+      <article class="planner-day {% if planned %}has-plan{% endif %} {% if loop.index0 == today_index %}today{% endif %}">
+        <div class="planner-day-top"><span>{{ day[:3] }}</span><small>{{ day }}</small></div>
+        <label class="field planner-select">
+          <span>Workout</span>
+          <select name="day_{{ loop.index0 }}">
+            <option value="">Open / recovery</option>
+            {% for workout in workouts %}
+              <option value="{{ workout['id'] }}" {% if planned and planned['workout_id'] == workout['id'] %}selected{% endif %}>{{ workout['name'] }}</option>
+            {% endfor %}
+          </select>
+        </label>
+        {% if planned %}
+          <div class="planner-day-meta"><strong>{{ planned['name'] }}</strong><small>{{ planned['exercise_count'] }} exercises</small></div>
+        {% else %}
+          <div class="planner-day-meta muted"><strong>Flexible day</strong><small>No workout assigned</small></div>
+        {% endif %}
+      </article>
+    {% endfor %}
+  </div>
+  <div class="planner-actions reveal">
+    <button class="btn btn-primary">Save weekly plan</button>
+    <a class="btn btn-secondary" href="{{ url_for('workouts') }}">Manage workouts</a>
+  </div>
+</form>
+
+<section class="panel reveal section-block planner-help">
+  <div class="panel-heading"><div><span class="eyebrow">How it works</span><h2>Schedule, then train</h2></div></div>
+  <div class="planner-help-grid">
+    <article><span>01</span><strong>Build reusable plans</strong><small>Create workouts once and keep editing them as your training changes.</small></article>
+    <article><span>02</span><strong>Assign the week</strong><small>Map those plans to the days you normally train. Nothing is locked in.</small></article>
+    <article><span>03</span><strong>Start from Home</strong><small>Your dashboard shows the schedule and lets you launch a planned workout quickly.</small></article>
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en" data-color-mode="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f4f5ef">
+  <title>{% block title %}{{ app_name }}{% endblock %}</title>
+  <script>try{const k='exerxeye-color-mode-v1',s=localStorage.getItem(k),d=s?s==='dark':matchMedia('(prefers-color-scheme: dark)').matches;document.documentElement.dataset.colorMode=d?'dark':'light'}catch(_){}</script>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <link rel="manifest" href="{{ url_for('static', filename='manifest.webmanifest') }}">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+</head>
+<body {% if celebrate %}data-celebrate="1"{% endif %}>
+  <div class="route-curtain" id="route-curtain" aria-hidden="true"></div>
+
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="top-brand" href="{{ url_for('dashboard') if current_user else url_for('index') }}" aria-label="ExerxEye home">
+        <span class="top-brand-mark" style="position:relative">E</span>
+        <span class="top-brand-word">ExerxEye</span>
+      </a>
+
+      <nav class="top-nav organized-nav" aria-label="Primary navigation">
+        {% if current_user %}<a href="{{ url_for('dashboard') }}" data-path="/dashboard">Home</a>{% endif %}
+        <a href="{{ url_for('index') }}" data-path="/">Explore</a>
+        <details class="nav-menu" data-nav-prefix="/workouts,/planner">
+          <summary>Train <span>⌄</span></summary>
+          <div class="nav-popover">
+            <a href="{{ url_for('workouts') }}" data-path="/workouts"><b>Workouts</b><small>Build and run training plans</small></a>
+            {% if current_user %}<a href="{{ url_for('planner') }}" data-path="/planner"><b>Weekly planner</b><small>Map plans to training days</small></a>{% endif %}
+          </div>
+        </details>
+        <details class="nav-menu" data-nav-prefix="/progress,/stats,/exports">
+          <summary>Track <span>⌄</span></summary>
+          <div class="nav-popover">
+            <a href="{{ url_for('progress_page') }}" data-path="/progress"><b>Progress</b><small>Sets, volume and strength history</small></a>
+            <a href="{{ url_for('stats_page') }}" data-path="/stats"><b>Library stats</b><small>Exercise database coverage</small></a>
+            {% if current_user %}<a href="{{ url_for('exports_page') }}" data-path="/exports"><b>Export center</b><small>Download your private data</small></a>{% endif %}
+          </div>
+        </details>
+      </nav>
+
+      <div class="top-actions">
+        <button class="top-install" id="pwa-install" type="button" hidden>Install</button>
+        <button class="top-command" type="button" data-command-open aria-label="Open command menu">⌘K</button>
+        <button class="dark-mode-toggle" id="dark-mode-toggle" type="button" aria-label="Toggle dark mode" aria-pressed="false"><span class="mode-sun">☀</span><span class="mode-moon">☾</span><b class="mode-label">Dark</b></button>
+        {% if current_user %}
+          <a class="top-profile" href="{{ url_for('account') }}"><span>{{ current_user['username'][0]|upper }}</span><b>{{ current_user['username'] }}</b></a>
+        {% else %}
+          <a class="top-login" href="{{ url_for('login') }}">Log in</a>
+          <a class="top-signup" href="{{ url_for('signup') }}">Sign up</a>
+        {% endif %}
+      </div>
+    </div>
+  </header>
+
+  <div class="search-ribbon">
+    <div class="search-ribbon-inner">
+      <div class="context-line"><span>{% block utility_title %}Exercise intelligence{% endblock %}</span><i></i><a href="{{ url_for('random_page') }}">Random exercise</a></div>
+      <form action="{{ url_for('index') }}" method="get" class="global-search global-search-v5">
+        <span class="search-symbol">⌕</span>
+        <input id="global-search-input" name="q" value="{{ request.args.get('q', '') if request.endpoint == 'index' else '' }}" placeholder="Search movements, muscles, equipment…" aria-label="Search exercises">
+        <kbd>/</kbd>
+      </form>
+    </div>
+  </div>
+
+  <main class="content-shell page-enter">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}<div class="flash-stack">{% for category, message in messages %}<div class="flash {{ category }}">{{ message }}</div>{% endfor %}</div>{% endif %}
+    {% endwith %}
+    {% block content %}{% endblock %}
+  </main>
+
+  <nav class="mobile-dock" aria-label="Mobile navigation">
+    {% if current_user %}<a href="{{ url_for('dashboard') }}" data-path="/dashboard"><span>⌂</span><b>Home</b></a>{% else %}<a href="{{ url_for('index') }}" data-path="/"><span>⌕</span><b>Explore</b></a>{% endif %}
+    <a href="{{ url_for('workouts') }}" data-path="/workouts"><span>＋</span><b>Train</b></a>
+    {% if current_user %}<a href="{{ url_for('planner') }}" data-path="/planner"><span>▦</span><b>Plan</b></a>{% endif %}
+    <a href="{{ url_for('progress_page') }}" data-path="/progress"><span>↗</span><b>Progress</b></a>
+    {% if current_user %}<a href="{{ url_for('account') }}" data-path="/account"><span>{{ current_user['username'][0]|upper }}</span><b>Account</b></a>{% else %}<a href="{{ url_for('login') }}" data-path="/login"><span>○</span><b>Account</b></a>{% endif %}
+  </nav>
+
+  <aside class="compare-tray" id="compare-tray" aria-live="polite" hidden>
+    <div><strong>Compare exercises</strong><span id="compare-count">0 of 3 selected</span></div>
+    <div class="compare-actions"><button class="btn btn-secondary btn-small" type="button" id="compare-clear">Clear</button><button class="btn btn-primary btn-small" type="button" id="compare-open">Compare</button></div>
+  </aside>
+
+  <div class="modal-shell" id="compare-modal" hidden><div class="modal-backdrop" data-modal-close></div><section class="modal-card compare-modal-card" role="dialog" aria-modal="true" aria-labelledby="compare-title"><div class="modal-head"><div><span class="eyebrow">Side by side</span><h2 id="compare-title">Exercise comparison</h2></div><button class="icon-button" type="button" data-modal-close aria-label="Close">×</button></div><div id="compare-content" class="compare-grid"></div></section></div>
+
+  <div class="modal-shell" id="command-modal" hidden><div class="modal-backdrop" data-command-close></div><section class="modal-card command-card" role="dialog" aria-modal="true"><div class="command-search"><span>⌕</span><input id="command-input" autocomplete="off" placeholder="Type a command…"><kbd>Esc</kbd></div><div class="command-list" id="command-list">
+    <a href="{{ url_for('index') }}" data-command-item data-label="exercise library search discover"><span>Explore exercises</span><small>E</small></a>
+    <a href="{{ url_for('random_page') }}" data-command-item data-label="randomizer random exercise"><span>Random exercise</span><small>R</small></a>
+    <a href="{{ url_for('workouts') }}" data-command-item data-label="workouts train plans"><span>Workouts</span><small>W</small></a>
+    {% if current_user %}<a href="{{ url_for('planner') }}" data-command-item data-label="planner week schedule training days"><span>Weekly planner</span><small>Plan</small></a>{% endif %}
+    <a href="{{ url_for('progress_page') }}" data-command-item data-label="progress history insights"><span>Progress</span><small>P</small></a>
+    <a href="{{ url_for('stats_page') }}" data-command-item data-label="statistics analytics library"><span>Statistics</span><small>S</small></a>
+    {% if current_user %}<a href="{{ url_for('exports_page') }}" data-command-item data-label="export data csv json download"><span>Export data</span><small>CSV / JSON</small></a><a href="{{ url_for('account') }}" data-command-item data-label="account profile settings"><span>Account</span><small>{{ current_user['username'] }}</small></a>{% else %}<a href="{{ url_for('login') }}" data-command-item data-label="login sign in account"><span>Log in</span><small>Account</small></a><a href="{{ url_for('signup') }}" data-command-item data-label="signup create account"><span>Create account</span><small>Free</small></a>{% endif %}
+    <button type="button" data-command-item data-label="toggle dark mode appearance" id="command-theme"><span>Toggle dark mode</span><small>T</small></button>
+  </div></section></div>
+
+  <div class="toast-stack" id="toast-stack" aria-live="polite"></div>
+  <div class="celebration-layer" id="celebration-layer" aria-hidden="true"></div>
+  <script src="{{ url_for('static', filename='theme.js') }}"></script>
+  <script src="{{ url_for('static', filename='app.js') }}"></script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

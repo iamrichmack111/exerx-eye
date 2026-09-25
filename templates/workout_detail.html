@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+{% block title %}{{ workout['name'] }} · ExerxEye{% if session_id %}
+<div class="session-sticky-bar" data-session-sticky>
+  <div><span>Session</span><strong>{{ session_summary.logged_sets }}/{{ session_summary.planned_sets }} sets · {{ session_summary.percent }}%</strong></div>
+  <div class="session-sticky-actions"><button type="button" class="btn btn-secondary btn-small" id="jump-next-exercise">Next unfinished</button><form method="post" action="{{ url_for('finish_session', session_id=session_id) }}"><button class="btn btn-primary btn-small">Finish workout</button></form></div>
+</div>
+{% endif %}
+{% endblock %}
+{% block utility_title %}Workout session{% endblock %}
+{% block content %}
+<div class="breadcrumb reveal"><a href="{{ url_for('workouts') }}">Workouts</a><span>/</span><span>{{ workout['name'] }}</span></div>
+
+<section class="workout-header panel reveal">
+  <div>
+    <span class="eyebrow">Training plan</span>
+    <h1>{{ workout['name'] }}</h1>
+    <p>{{ workout['notes'] or 'No notes for this workout.' }}</p>
+  </div>
+  <div class="session-action">
+    {% if session_id %}
+      <span class="session-status active">Session active</span>
+      <div class="session-header-actions"><form method="post" action="{{ url_for('finish_session', session_id=session_id) }}"><button class="btn btn-danger">Finish session</button></form><form method="post" action="{{ url_for('discard_session', session_id=session_id) }}" data-confirm="Discard this unfinished session and its logged sets?"><button class="btn btn-secondary">Discard</button></form></div>
+    {% else %}
+      <span class="session-status">Ready to train</span>
+      <form method="post" action="{{ url_for('start_session', workout_id=workout['id']) }}"><button class="btn btn-primary">Start session</button></form>
+    {% endif %}
+  </div>
+</section>
+
+{% if not session_id %}
+<details class="panel plan-settings reveal section-block">
+  <summary><span><b>Edit workout details</b><small>Rename the plan or change its notes.</small></span><b>＋</b></summary>
+  <form method="post" action="{{ url_for('update_workout', workout_id=workout['id']) }}" class="plan-settings-form">
+    <label class="field"><span>Name</span><input name="name" value="{{ workout['name'] }}" required></label>
+    <label class="field field-wide"><span>Notes</span><input name="notes" value="{{ workout['notes'] }}" placeholder="Training focus, tempo, constraints…"></label>
+    <button class="btn btn-primary">Save details</button>
+  </form>
+</details>
+{% endif %}
+
+{% if session_id %}
+<section class="session-cockpit section-block reveal">
+  <article class="panel session-progress-card">
+    <div class="panel-heading"><div><span class="eyebrow">Session progress</span><h2>{{ session_summary.logged_sets }} / {{ session_summary.planned_sets }} planned sets</h2></div><strong>{{ session_summary.percent }}%</strong></div>
+    <div class="session-progress-track"><i style="--progress:{{ session_summary.percent }}%"></i></div>
+    <div class="session-mini-stats"><span><strong>{{ session_summary.remaining_sets }}</strong> remaining</span><span><strong>{{ session_summary.volume }}</strong> lb volume</span></div>
+  </article>
+  <article class="panel rest-timer" data-rest-timer data-default-rest="{{ default_rest }}">
+    <div><span class="eyebrow">Rest timer</span><h2 id="timer-display">{{ "%02d:%02d"|format(default_rest // 60, default_rest % 60) }}</h2><p>Auto-starts after each logged set.</p></div>
+    <div class="timer-controls"><button type="button" data-rest="30" {% if default_rest == 30 %}class="active"{% endif %}>30s</button><button type="button" data-rest="45" {% if default_rest == 45 %}class="active"{% endif %}>45s</button><button type="button" data-rest="60" {% if default_rest == 60 %}class="active"{% endif %}>60s</button><button type="button" data-rest="90" {% if default_rest == 90 %}class="active"{% endif %}>90s</button><button type="button" data-rest="120" {% if default_rest == 120 %}class="active"{% endif %}>2m</button><button type="button" id="timer-toggle" class="timer-primary">Start</button></div>
+  </article>
+</section>
+{% endif %}
+
+<section class="section-block workout-stack">
+  <div class="section-heading reveal"><div><span class="eyebrow">Workout structure</span><h2>{{ items|length }} exercise{% if items|length != 1 %}s{% endif %}</h2></div>{% if not session_id %}<span class="section-note">Edit targets or reorder the plan before training.</span>{% endif %}</div>
+  {% for item in items %}
+  <article class="workout-exercise-card panel reveal {% if session_id and sets_by_exercise.get(item['exercise_id'], [])|length >= item['sets'] %}exercise-complete{% endif %}" data-session-exercise data-planned-sets="{{ item['sets'] }}" data-logged-sets="{{ sets_by_exercise.get(item['exercise_id'], [])|length if session_id else 0 }}">
+    <div class="workout-exercise-head">
+      <div class="workout-order">{{ '%02d'|format(loop.index) }}</div>
+      <div class="workout-exercise-title"><a href="{{ url_for('exercise_detail', exercise_id=item['exercise_id']) }}">{{ item['exercise_name'] }}</a><span>{{ item['main_muscle'] }} · {{ item['equipment'] or 'Bodyweight' }}</span></div>
+      <div class="planned-target"><strong>{{ item['sets'] }} × {{ item['reps'] }}</strong><span>{% if item['target_weight'] %}{{ item['target_weight']|round(1) }} lb target{% else %}Bodyweight / open load{% endif %}</span>{% if session_id and sets_by_exercise.get(item['exercise_id'], [])|length >= item['sets'] %}<b class="exercise-done-badge">Done ✓</b>{% endif %}</div>
+    </div>
+
+    {% if session_id %}
+      {% set logged = sets_by_exercise.get(item['exercise_id'], []) %}
+      {% if logged %}
+      <div class="logged-set-strip" aria-label="Logged sets">
+        {% for row in logged %}<span><b>S{{ row['set_number'] }}</b> {{ row['reps'] }}×{{ row['weight']|round(1) }}{% if row['rir'] is not none %} · {{ row['rir'] }} RIR{% endif %}</span>{% endfor %}
+      </div>
+      {% endif %}
+      {% set last_logged = logged[-1] if logged else none %}
+      <form method="post" class="session-log-form" action="{{ url_for('log_set', session_id=session_id, exercise_id=item['exercise_id']) }}">
+        <label><span>Reps</span><input name="reps" type="number" min="1" value="{{ last_logged['reps'] if last_logged else item['reps'] }}" required></label>
+        <label><span>Weight</span><input name="weight" type="number" min="0" step="0.5" value="{{ last_logged['weight'] if last_logged else item['target_weight'] }}"></label>
+        <label><span>RIR <i title="Repetitions in reserve">?</i></span><input name="rir" type="number" min="0" max="10" value="{{ last_logged['rir'] if last_logged and last_logged['rir'] is not none else '' }}" placeholder="optional"></label>
+        <label class="set-note"><span>Set note</span><input name="note" maxlength="240" placeholder="optional note"></label>
+        <button class="btn btn-primary">Log set</button>
+      </form>
+      <div class="quick-adjust" aria-label="Quick set adjustments">
+        <button type="button" data-adjust="reps" data-step="-1">−1 rep</button><button type="button" data-adjust="reps" data-step="1">+1 rep</button><button type="button" data-adjust="weight" data-step="-5">−5 lb</button><button type="button" data-adjust="weight" data-step="5">+5 lb</button>
+      </div>
+    {% else %}
+      <form method="post" class="plan-edit-row" action="{{ url_for('update_workout_item', workout_id=workout['id'], item_id=item['item_id']) }}">
+        <label><span>Sets</span><input name="sets" type="number" min="1" max="30" value="{{ item['sets'] }}"></label>
+        <label><span>Reps</span><input name="reps" type="number" min="1" max="200" value="{{ item['reps'] }}"></label>
+        <label><span>Target lb</span><input name="target_weight" type="number" min="0" step="0.5" value="{{ item['target_weight'] }}"></label>
+        <button class="btn btn-secondary btn-small">Save target</button>
+      </form>
+      <div class="plan-row-actions">
+        <form method="post" action="{{ url_for('move_workout_item', workout_id=workout['id'], item_id=item['item_id']) }}"><input type="hidden" name="direction" value="up"><button class="mini-action" {% if loop.first %}disabled{% endif %}>↑ Up</button></form>
+        <form method="post" action="{{ url_for('move_workout_item', workout_id=workout['id'], item_id=item['item_id']) }}"><input type="hidden" name="direction" value="down"><button class="mini-action" {% if loop.last %}disabled{% endif %}>↓ Down</button></form>
+        <form method="post" action="{{ url_for('remove_from_workout', workout_id=workout['id'], item_id=item['item_id']) }}" data-confirm="Remove this exercise from the workout?"><button class="mini-action danger">Remove</button></form>
+      </div>
+    {% endif %}
+  </article>
+  {% else %}
+  <div class="empty-state"><span>Empty plan</span><h3>Add exercises before starting.</h3><p>Browse the movement library and add exercises to this workout.</p><a class="btn btn-primary" href="{{ url_for('index') }}">Browse exercises</a></div>
+  {% endfor %}
+</section>
+{% endblock %}

@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+{% block title %}Home · ExerxEye{% endblock %}
+{% block utility_title %}Training home{% endblock %}
+{% block content %}
+
+<section class="dashboard-today reveal">
+  <div class="today-copy">
+    <span class="eyebrow">Today</span>
+    <h1>{{ current_user['username'] }}, here’s the plan.</h1>
+    {% if dashboard.active_session %}
+      <p>You already have a workout in progress. Pick up exactly where you left off.</p>
+      <div class="today-actions">
+        <a class="btn btn-primary" href="{{ url_for('workout_detail', workout_id=dashboard.active_session['workout_id'], session=dashboard.active_session['id']) }}">Resume {{ dashboard.active_session['workout_name'] }}</a>
+        <form method="post" action="{{ url_for('discard_session', session_id=dashboard.active_session['id']) }}" data-confirm="Discard this unfinished session and its logged sets?"><button class="btn btn-secondary">Discard session</button></form>
+      </div>
+    {% elif dashboard.next_workout %}
+      <p>{% if dashboard.today_plan %}Your scheduled workout is ready.{% else %}Nothing is scheduled today, so your most recent plan is ready as a quick start.{% endif %}</p>
+      <div class="today-actions">
+        <form method="post" action="{{ url_for('start_session', workout_id=dashboard.next_workout['id']) }}"><button class="btn btn-primary">Start {{ dashboard.next_workout['name'] }}</button></form>
+        <a class="btn btn-secondary" href="{{ url_for('workout_detail', workout_id=dashboard.next_workout['id']) }}">Review plan</a>
+      </div>
+    {% else %}
+      <p>Create a workout or generate one automatically, then it will surface here when you are ready to train.</p>
+      <div class="today-actions"><a class="btn btn-primary" href="{{ url_for('workouts') }}">Build a workout</a><a class="btn btn-secondary" href="{{ url_for('index') }}">Explore exercises</a></div>
+    {% endif %}
+  </div>
+
+  <aside class="today-status-card">
+    <div class="today-status-head"><span>This week</span><strong>{{ dashboard.week_goal.sessions }}/{{ dashboard.week_goal.goal }}</strong></div>
+    <div class="goal-progress"><i style="--goal-progress:{{ dashboard.week_goal.percent }}%"></i></div>
+    <div class="today-status-grid">
+      <div><strong>{{ dashboard.streak.current }}</strong><span>day streak</span></div>
+      <div><strong>{{ dashboard.week.sets }}</strong><span>working sets</span></div>
+      <div><strong>{{ dashboard.week.volume }}</strong><span>lb volume</span></div>
+    </div>
+    <a href="{{ url_for('planner') }}">Open weekly planner <span>↗</span></a>
+  </aside>
+</section>
+
+<section class="quick-action-strip reveal" aria-label="Quick actions">
+  <a href="{{ url_for('workouts') }}"><span>＋</span><div><strong>Build</strong><small>Create or generate a workout</small></div></a>
+  <a href="{{ url_for('index') }}"><span>⌕</span><div><strong>Explore</strong><small>Find a movement</small></div></a>
+  <a href="{{ url_for('planner') }}"><span>▦</span><div><strong>Plan</strong><small>Organize the week</small></div></a>
+  <a href="{{ url_for('progress_page') }}"><span>↗</span><div><strong>Review</strong><small>Check your progress</small></div></a>
+</section>
+
+<section class="dashboard-section section-block">
+  <div class="section-heading reveal"><div><span class="eyebrow">This week</span><h2>Seven-day training map</h2></div><a class="text-link" href="{{ url_for('planner') }}">Edit schedule ↗</a></div>
+  <div class="week-board reveal">
+    {% set day_names = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'] %}
+    {% for day in range(7) %}
+      {% set planned = dashboard.schedule_map.get(day) %}
+      {% set activity = dashboard.week_activity[day] %}
+      <article class="week-board-day {% if day == dashboard.today_index %}today{% endif %} {% if activity.sessions %}trained{% endif %}">
+        <div class="week-board-top"><span>{{ day_names[day] }}</span>{% if day == dashboard.today_index %}<b>Today</b>{% endif %}</div>
+        <div class="week-board-dot"><i></i></div>
+        {% if planned %}
+          <strong>{{ planned['name'] }}</strong><small>{{ planned['exercise_count'] }} exercises</small>
+        {% else %}
+          <strong>Open day</strong><small>Recovery or flexible training</small>
+        {% endif %}
+        {% if activity.sessions %}<em>{{ activity.sessions }} completed</em>{% elif planned and day == dashboard.today_index %}<em>Ready to start</em>{% else %}<em>—</em>{% endif %}
+      </article>
+    {% endfor %}
+  </div>
+</section>
+
+<section class="dashboard-section section-block">
+  <div class="section-heading reveal"><div><span class="eyebrow">Insights</span><h2>Your training at a glance</h2></div><a class="text-link" href="{{ url_for('progress_page') }}">Open progress ↗</a></div>
+  <div class="insight-grid">
+    <article class="panel insight-card reveal">
+      <div class="insight-number"><strong class="count-up" data-count="{{ dashboard.active_days_30 }}">{{ dashboard.active_days_30 }}</strong><span>active days</span></div>
+      <p>Days with a completed session in the last 30 days.</p>
+      <small>Best current streak: {{ dashboard.streak.best }} day{% if dashboard.streak.best != 1 %}s{% endif %}</small>
+    </article>
+    <article class="panel insight-card reveal">
+      <div class="panel-heading"><div><span class="eyebrow">Volume trend</span><h3>Last 30 days</h3></div></div>
+      {% if trend %}
+      <div class="mini-volume-chart" aria-label="Thirty day volume trend">
+        {% for point in trend %}<i style="--mini-bar:{{ ((point.volume / trend_max * 100) if trend_max else 0)|round(1) }}%" title="{{ point.day }} · {{ point.volume }} lb"></i>{% endfor %}
+      </div>
+      {% else %}<div class="home-empty compact"><strong>No volume yet.</strong><span>Log sets to build the chart.</span></div>{% endif %}
+    </article>
+    <article class="panel insight-card muscle-card reveal">
+      <div class="panel-heading"><div><span class="eyebrow">Training mix</span><h3>30-day muscle volume</h3></div></div>
+      {% set muscle_max = dashboard.muscle_volume[0]['volume'] if dashboard.muscle_volume else 1 %}
+      <div class="muscle-mix-list">
+        {% for row in dashboard.muscle_volume[:5] %}
+          <div><span>{{ row['muscle'] }}</span><i><b style="--mix:{{ ((row['volume'] / muscle_max * 100) if muscle_max else 0)|round(1) }}%"></b></i><strong>{{ row['sets'] }} sets</strong></div>
+        {% else %}<div class="home-empty compact"><strong>No muscle data yet.</strong><span>Complete a weighted or bodyweight session.</span></div>{% endfor %}
+      </div>
+    </article>
+  </div>
+</section>
+
+<section class="dashboard-section section-block">
+  <div class="section-heading reveal"><div><span class="eyebrow">Recent activity</span><h2>Sessions and strength markers</h2></div></div>
+  <div class="dashboard-activity-grid">
+    <section class="panel reveal">
+      <div class="panel-heading"><div><h3>Completed sessions</h3></div><a class="text-link" href="{{ url_for('progress_page') }}">History ↗</a></div>
+      <div class="recent-session-list">
+        {% for row in dashboard.recent_sessions %}
+          <a class="recent-session-link" href="{{ url_for('session_summary', session_id=row['id']) }}"><article><div><strong>{{ row['workout_name'] }}</strong><small>{{ row['completed_at'] }}</small></div><div class="recent-session-stats"><span>{{ row['set_count'] }} sets</span><span>{{ row['volume'] }} lb</span>{% if row['session_rpe'] %}<span>RPE {{ row['session_rpe'] }}</span>{% endif %}</div></article></a>
+        {% else %}<div class="home-empty"><strong>No completed sessions yet.</strong><span>Finish a workout and it will appear here.</span></div>{% endfor %}
+      </div>
+    </section>
+    <section class="panel reveal">
+      <div class="panel-heading"><div><h3>Current PR markers</h3></div></div>
+      <div class="pr-list">
+        {% for row in dashboard.recent_prs %}
+          <a href="{{ url_for('exercise_detail', exercise_id=row['exercise_id']) }}"><span>PR</span><div><strong>{{ row['exercise_name'] }}</strong><small>{{ row['reps'] }} reps @ {{ row['weight'] }} lb</small></div><b>{{ row['est_1rm'] }} <small>est. 1RM</small></b></a>
+        {% else %}<div class="home-empty"><strong>No weighted PRs yet.</strong><span>Your best estimated 1RM markers will show here.</span></div>{% endfor %}
+      </div>
+    </section>
+  </div>
+</section>
+{% endblock %}

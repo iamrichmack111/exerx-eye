@@ -1,0 +1,19 @@
+{
+  "name": "exerx-eye-main",
+  "version": "1.0.0",
+  "description": "ExerxEye is a Flask exercise intelligence and training workspace backed by SQLite. It combines a searchable exercise library with private user accounts, favorites, workout planning, live session logging, analytics, exports, and a motion-rich responsive interface.",
+  "main": "index.js",
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "devDependencies": {
+    "@playwright/test": "^1.63.0"
+  }
+}

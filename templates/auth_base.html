@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en" data-color-mode="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f4f5ef">
+  <title>{% block title %}Account · ExerxEye{% endblock %}</title>
+  <script>try{const k='exerxeye-color-mode-v1',s=localStorage.getItem(k),d=s?s==='dark':matchMedia('(prefers-color-scheme: dark)').matches;document.documentElement.dataset.colorMode=d?'dark':'light'}catch(_){}</script>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body class="auth-body auth-v5">
+  <header class="auth-topbar">
+    <a class="top-brand" href="{{ url_for('index') }}"><span class="top-brand-mark" style="position:relative">E</span><span class="top-brand-word">ExerxEye</span></a>
+    <div class="auth-top-actions"><button class="dark-mode-toggle" id="dark-mode-toggle" type="button" aria-label="Toggle dark mode" aria-pressed="false"><span class="mode-sun">☀</span><span class="mode-moon">☾</span><b class="mode-label">Dark</b></button><a class="auth-back" href="{{ url_for('index') }}">Browse exercises</a></div>
+  </header>
+  <main class="auth-layout-v5">
+    <section class="auth-copy-v5">
+      <span class="auth-kicker">Your training, organized.</span>
+      <h1>{% block hero_title %}Train with context.{% endblock %}</h1>
+      <p>{% block hero_copy %}Save exercises, build workouts, log sessions, and export your history from one private account.{% endblock %}</p>
+      <div class="auth-feature-list"><span><b>01</b>Private favorites</span><span><b>02</b>Workout planning</span><span><b>03</b>Progress + exports</span></div>
+    </section>
+    <section class="auth-card auth-card-v5 page-enter">
+      {% with messages = get_flashed_messages(with_categories=true) %}{% if messages %}<div class="flash-stack auth-flashes">{% for category,message in messages %}<div class="flash {{ category }}">{{ message }}</div>{% endfor %}</div>{% endif %}{% endwith %}
+      {% block form %}{% endblock %}
+    </section>
+  </main>
+  <script src="{{ url_for('static', filename='theme.js') }}"></script>
+  <script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>

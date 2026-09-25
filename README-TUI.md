@@ -11,7 +11,7 @@ ExerxEye is a terminal-first training intelligence platform that combines exerci
 - `exerx-eye random` — randomized exercise selection
 - `exerx-eye stats` — dataset/training analytics
 - `exerx-eye doctor` — database/system health checks
-- FastAPI REST service for programmatic access
+- Flask web + JSON service for programmatic access
 
 
 # ExerxEye v3.0
@@ -27,7 +27,7 @@ A portfolio-grade terminal-first exercise platform built from a 617-row exercise
 - **Progress tab**: set history, volume, estimated 1RM, and trends
 - **System tab**: DB health, latency, size, schema version, and architecture view
 - **Schema migrations**: versioned `schema_migrations` table
-- **Unified SQLite data layer** shared by the TUI and FastAPI
+- **Unified SQLite data layer** shared by the TUI and Flask web app
 - **CLI surface**: search, random, stats, doctor, export, import, tui
 - **Docker Compose API** with persistent volume and `/health` healthcheck
 - Existing favorites, CSV export, randomizer, filters, muscle browser, and full exercise instructions
@@ -42,7 +42,7 @@ A portfolio-grade terminal-first exercise platform built from a 617-row exercise
                    │                           ├── Progress / Charts
                    │                           └── Stats / System Health
                    │
-                   ├────────► FastAPI REST API ──► Docker
+                   ├────────► Flask web + JSON API ──► Docker
                    │
                    └────────► CLI / doctor / export
 ```

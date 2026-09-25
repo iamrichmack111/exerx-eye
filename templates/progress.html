@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block title %}Progress · ExerxEye{% endblock %}
+{% block utility_title %}Training progress{% endblock %}
+{% block content %}
+<section class="page-header reveal">
+  <div><span class="eyebrow">Insights</span><h1>Progress</h1><p>Review volume, strength markers, effort, and your completed training sets.</p></div>
+  <a class="btn btn-secondary" href="{{ url_for('export_progress', exercise=selected_exercise or '') }}">Export CSV ↓</a>
+</section>
+
+<nav class="range-tabs reveal" aria-label="Progress range">
+  {% for value,label in [(7,'7 days'),(30,'30 days'),(90,'90 days'),(365,'1 year')] %}
+    <a class="{% if days == value %}active{% endif %}" href="{{ url_for('progress_page', exercise=selected_exercise or '', days=value) }}">{{ label }}</a>
+  {% endfor %}
+</nav>
+
+<section class="metric-grid progress-metrics reveal">
+  <div class="metric"><span>Logged sets</span><strong class="count-up" data-count="{{ summary.sets }}">{{ summary.sets }}</strong></div>
+  <div class="metric"><span>Sessions</span><strong class="count-up" data-count="{{ summary.sessions }}">{{ summary.sessions }}</strong></div>
+  <div class="metric"><span>Total volume</span><strong>{{ summary.volume }}</strong><small>lb</small></div>
+  <div class="metric"><span>Max weight</span><strong>{{ summary.max_weight }}</strong><small>lb</small></div>
+  <div class="metric"><span>Best est. 1RM</span><strong>{{ summary.best_1rm }}</strong><small>lb</small></div>
+</section>
+
+<div class="progress-insight-grid section-block">
+  <section class="panel reveal">
+    <div class="panel-heading"><div><span class="eyebrow">Trend</span><h2>{{ days }}-day volume</h2></div></div>
+    {% if trend %}
+      <div class="volume-chart large" role="img" aria-label="Daily training volume">
+        {% for point in trend %}
+          <div class="volume-bar-wrap" title="{{ point.day }} · {{ point.volume }} lb · {{ point.sets }} sets"><i class="volume-bar" style="--bar: {{ ((point.volume / trend_max * 100) if trend_max else 0)|round(1) }}%"></i><span>{{ point.day[5:] }}</span></div>
+        {% endfor %}
+      </div>
+    {% else %}<div class="home-empty"><strong>No volume in this range.</strong><span>Complete a workout to start the chart.</span></div>{% endif %}
+  </section>
+  <section class="panel reveal">
+    <div class="panel-heading"><div><span class="eyebrow">PR board</span><h2>Current estimated 1RM bests</h2></div></div>
+    <div class="pr-list compact">
+      {% for row in prs %}<a href="{{ url_for('exercise_detail', exercise_id=row['exercise_id']) }}"><span>PR</span><div><strong>{{ row['exercise_name'] }}</strong><small>{{ row['reps'] }} @ {{ row['weight'] }} lb</small></div><b>{{ row['est_1rm'] }}</b></a>{% else %}<div class="home-empty"><strong>No weighted PRs yet.</strong><span>Weighted set history will appear here.</span></div>{% endfor %}
+    </div>
+  </section>
+</div>
+
+<section class="panel filter-panel compact-panel reveal">
+  <div class="panel-heading"><div><span class="eyebrow">Log controls</span><h2>Filter history</h2></div>{% if selected_exercise %}<a class="text-link" href="{{ url_for('progress_page', days=days) }}">Clear exercise</a>{% endif %}</div>
+  <form method="get" class="progress-filter">
+    <input type="hidden" name="days" value="{{ days }}">
+    <label class="field"><span>Exercise</span><select name="exercise"><option value="">All exercises</option>{% for e in exercises %}<option value="{{ e.id }}" {% if selected_exercise == e.id %}selected{% endif %}>{{ e.exercise_name }}</option>{% endfor %}</select></label>
+    <button class="btn btn-primary">Apply filter</button>
+  </form>
+</section>
+
+<section class="panel table-panel section-block reveal">
+  <div class="panel-heading"><div><span class="eyebrow">History</span><h2>Completed sets</h2></div><span class="section-note">Newest activity first</span></div>
+  <div class="table-wrap"><table><thead><tr><th>Exercise</th><th>Workout</th><th>Reps</th><th>Weight</th><th>RIR</th><th>Volume</th><th>Est. 1RM</th><th>Date</th></tr></thead><tbody>
+    {% for r in rows %}<tr><td><strong>{{ r['exercise_name'] }}</strong>{% if r['note'] %}<small class="table-note">{{ r['note'] }}</small>{% endif %}</td><td>{{ r['workout_name'] }}</td><td>{{ r['reps'] }}</td><td>{{ r['weight'] }}</td><td>{{ r['rir'] if r['rir'] is not none else '—' }}</td><td>{{ r['volume'] }}</td><td>{{ r['est_1rm'] }}</td><td>{{ r['completed_at'] }}</td></tr>
+    {% else %}<tr><td colspan="8"><div class="table-empty">No sets logged in this range.</div></td></tr>{% endfor %}
+  </tbody></table></div>
+</section>
+{% endblock %}

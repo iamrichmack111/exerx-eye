@@ -6,7 +6,7 @@ def seed(db):
 
 def test_schema_health_and_progress(tmp_path):
     db=ExerxEye(tmp_path/'v3.db'); seed(db)
-    assert db.schema_version()==3
+    assert db.schema_version()>=5
     eid=db.conn.execute('SELECT id FROM exercises').fetchone()[0]
     wid=db.create_workout('Leg Day'); db.add_to_workout(wid,eid,5,5,225)
     sid=db.start_session(wid)

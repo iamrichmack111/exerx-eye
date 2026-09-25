@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block title %}Session Review · ExerxEye{% endblock %}
+{% block utility_title %}Session review{% endblock %}
+{% block content %}
+<section class="session-review-hero reveal">
+  <div>
+    <span class="eyebrow">Workout complete</span>
+    <h1>{{ review.session['workout_name'] }}</h1>
+    <p>{{ review.session['completed_at'] or 'Session still in progress' }} · {{ review.duration_minutes }} min</p>
+  </div>
+  <div class="review-actions">
+    {% if review.session['workout_id'] %}<form method="post" action="{{ url_for('start_session', workout_id=review.session['workout_id']) }}"><button class="btn btn-primary">Run it again</button></form>{% endif %}
+    <a class="btn btn-secondary" href="{{ url_for('dashboard') }}">Back home</a>
+  </div>
+</section>
+
+<section class="review-metrics reveal">
+  <article><span>Working sets</span><strong>{{ review.sets }}</strong><small>logged</small></article>
+  <article><span>Exercises</span><strong>{{ review.exercises }}</strong><small>movements</small></article>
+  <article><span>Volume</span><strong>{{ review.volume }}</strong><small>lb</small></article>
+  <article><span>Avg RIR</span><strong>{{ review.avg_rir if review.avg_rir is not none else '—' }}</strong><small>logged effort</small></article>
+  <article><span>Top est. 1RM</span><strong>{{ review.top_1rm }}</strong><small>lb</small></article>
+</section>
+
+<div class="review-grid section-block">
+  <section class="panel reveal">
+    <div class="panel-heading"><div><span class="eyebrow">Breakdown</span><h2>What you completed</h2></div></div>
+    <div class="review-exercise-list">
+      {% for row in review.exercise_rows %}
+      <a href="{{ url_for('exercise_detail', exercise_id=row['exercise_id']) }}">
+        <div><strong>{{ row['exercise_name'] }}</strong><small>{{ row['sets'] }} sets · {{ row['reps'] }} reps total</small></div>
+        <div><span>{{ row['volume'] or 0 }} lb volume</span><span>{{ row['max_weight'] or 0 }} lb max{% if row['avg_rir'] is not none %} · {{ row['avg_rir'] }} RIR{% endif %}</span></div>
+      </a>
+      {% else %}
+      <div class="home-empty"><strong>No logged sets.</strong><span>This session was completed without any recorded work sets.</span></div>
+      {% endfor %}
+    </div>
+  </section>
+
+  <section class="panel reveal review-note-panel">
+    <div class="panel-heading"><div><span class="eyebrow">Reflection</span><h2>How did it feel?</h2></div></div>
+    <form method="post" class="review-form">
+      <label class="field"><span>Session RPE</span><select name="session_rpe"><option value="">Not rated</option>{% for value in range(1,11) %}<option value="{{ value }}" {% if review.session['session_rpe'] == value %}selected{% endif %}>{{ value }} / 10</option>{% endfor %}</select><small>Optional overall difficulty rating.</small></label>
+      <label class="field"><span>Session note</span><textarea name="note" maxlength="500" rows="6" placeholder="What felt strong? What should change next time?">{{ review.session['note'] or '' }}</textarea></label>
+      <button class="btn btn-primary btn-block">Save review</button>
+    </form>
+    <a class="text-link review-progress-link" href="{{ url_for('progress_page') }}">Open full progress history ↗</a>
+  </section>
+</div>
+{% endblock %}
