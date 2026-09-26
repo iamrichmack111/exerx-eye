@@ -13,3 +13,8 @@ node_modules/
 playwright-report/
 test-results/
 instance/*.db
+.demo-cache/
+.demo-venv/
+demo/captures/
+demo/render/
+DEMOS/*.mp4

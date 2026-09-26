@@ -10,9 +10,14 @@ permissions:
   contents: read
 
 jobs:
-  test:
+  web-test:
     runs-on: ubuntu-latest
     timeout-minutes: 15
+
+    env:
+      EXERXEYE_SECRET: github-actions-web-test-secret
+      FLASK_SECRET_KEY: github-actions-web-test-secret
+      PYTHONUNBUFFERED: "1"
 
     steps:
       - name: Checkout
@@ -28,24 +33,30 @@ jobs:
         with:
           node-version: "22"
 
-      - name: Install Python dependencies
+      - name: Install Flask web dependencies
         run: pip install -r requirements.txt
 
-      - name: Install Node dependencies
+      - name: Install test dependencies
+        run: pip install pytest
+
+      - name: Install Playwright
         run: npm install
 
       - name: Install Chromium
         run: npx playwright install --with-deps chromium
 
+      - name: Compile Flask app
+        run: |
+          python -m py_compile app.py
+          python -m compileall -q exerx_eye
+
       - name: Run Python tests
         run: pytest -q
 
-      - name: Generate Playwright screenshots
-        env:
-          EXERXEYE_SECRET: github-actions-secret
-        run: npx playwright test tests/screenshots.spec.cjs --project=chromium
+      - name: Run Playwright web tests
+        run: npx playwright test --project=chromium
 
-      - name: Verify screenshots
+      - name: Verify README screenshots
         run: |
           test -s screenshots/01-exercise-library.png
           test -s screenshots/02-exercise-library-dark.png
@@ -53,11 +64,11 @@ jobs:
           test -s screenshots/04-signup.png
           file screenshots/*.png
 
-      - name: Upload screenshots
+      - name: Upload Playwright screenshots
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: exerx-eye-screenshots
+          name: exerx-eye-playwright-screenshots
           path: screenshots/
           if-no-files-found: error
 
@@ -65,6 +76,6 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: playwright-report
+          name: exerx-eye-playwright-report
           path: playwright-report/
           if-no-files-found: ignore

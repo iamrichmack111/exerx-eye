@@ -1,0 +1,1 @@
+cd ~/Downloads/exerx-eye-main && unzip -qo ~/Downloads/exerx-eye-v10-piper-hq-demo-kit.zip && chmod +x publish_demo.sh demo/*.sh && ./publish_demo.sh

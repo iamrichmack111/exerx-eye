@@ -1,0 +1,33 @@
+# DISABLED LEGACY WORKFLOW
+#
+# This was the old TUI/PyPI publishing workflow. It intentionally does not use
+# a .yml/.yaml extension, so GitHub Actions will not execute it when a GitHub
+# Release is created. The current ExerxEye product is the Flask web app.
+#
+# To publish the legacy TUI package to PyPI in the future, move it into a
+# separate package/repository and configure PyPI trusted publishing there.
+
+name: Legacy TUI — Publish to PyPI (DISABLED)
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  pypi-publish:
+    runs-on: ubuntu-latest
+    environment:
+      name: pypi
+      url: https://pypi.org/p/exerx-eye
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python -m pip install --upgrade build
+      - run: python -m build
+      - uses: pypa/gh-action-pypi-publish@release/v1

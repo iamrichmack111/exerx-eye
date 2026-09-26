@@ -1,0 +1,42 @@
+[
+  {
+    "image": "01-explore-dark.png",
+    "title": "Explore",
+    "text": "Meet ExerxEye, a modern fitness tracker built around a simple flow: explore, train, and track. Browse a structured exercise library with a clean interface and a true dark mode."
+  },
+  {
+    "image": "02-exercise-detail.png",
+    "title": "Exercise intelligence",
+    "text": "Open any movement for focused exercise details, training context, related movements, and your own recent history. ExerxEye keeps discovery connected to the way you actually train."
+  },
+  {
+    "image": "03-dashboard.png",
+    "title": "Training home",
+    "text": "Create a local profile with only a username and password. Your training home brings today's plan, weekly goal, recent activity, streaks, and strength markers into one organized view."
+  },
+  {
+    "image": "04-workout.png",
+    "title": "Workout generator",
+    "text": "Build plans manually, or generate a workout in seconds. Choose full body, upper, lower, push, pull, or a single muscle focus, then edit the generated plan before you train."
+  },
+  {
+    "image": "05-planner.png",
+    "title": "Weekly planner",
+    "text": "The weekly planner maps saved workouts across Monday through Sunday. Your scheduled session then surfaces automatically on Home when that training day arrives."
+  },
+  {
+    "image": "06-progress.png",
+    "title": "Progress analytics",
+    "text": "Track completed sets, volume, estimated one rep max markers, repetitions in reserve, and workout history across seven, thirty, ninety, or three hundred sixty five day views."
+  },
+  {
+    "image": "07-exports.png",
+    "title": "Private exports",
+    "text": "Your data stays organized by account, and the export center can download progress, workouts, favorites, the exercise library, or a complete account bundle in CSV and JSON formats."
+  },
+  {
+    "image": "08-outro.png",
+    "title": "ExerxEye",
+    "text": "ExerxEye combines exercise discovery, workout planning, training sessions, analytics, exports, dark mode, and installable PWA support in one Flask application. ExerxEye. Exercise intelligence and analytics for your training."
+  }
+]

@@ -62,7 +62,16 @@ def main() -> None:
         try: print(f"Exported {db.export_rows(db.query(limit=100000),args.path)} rows -> {args.path}")
         finally: db.close()
         return
-    from .app import ExerciseTUI
-    ExerciseTUI(args.db).run()
+    if args.command == 'tui':
+        try:
+            from .app import ExerciseTUI
+        except ModuleNotFoundError as exc:
+            if exc.name == 'textual':
+                raise SystemExit("Legacy TUI is optional. Install it with: pip install 'ExerxEye[tui]'") from exc
+            raise
+        ExerciseTUI(args.db).run()
+        return
+
+    p.print_help()
 
 if __name__=='__main__': main()

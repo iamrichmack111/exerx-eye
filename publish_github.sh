@@ -159,6 +159,15 @@ if command -v gh >/dev/null 2>&1 && gh auth status >/dev/null 2>&1; then
     --title "ExerxEye ${tag#v} — Organized Motion + Features" \
     --notes "ExerxEye with organized Home / Explore / Train / Track navigation, workout generation, weekly planning, progress analytics, username accounts, dark mode, exports, installable PWA support, animations, correctly rendered 1440x900 Playwright screenshots, README badges and CI/CD."
   echo "Release created: $tag"
+
+  echo "==> Start HQ Piper demo workflow for $tag"
+  gh workflow run demo.yml --repo "$REPO" -f release_tag="$tag"
+  sleep 4
+  run_id="$(gh run list --repo "$REPO" --workflow demo.yml --event workflow_dispatch --limit 1 --json databaseId --jq '.[0].databaseId')"
+  if [[ -n "$run_id" && "$run_id" != "null" ]]; then
+    echo "HQ Piper demo workflow started: $run_id"
+    echo "Watch it with: gh run watch $run_id --repo $REPO"
+  fi
 else
   echo "NOTE: gh is not authenticated. Main and tag $tag were pushed; GitHub description/topics/release creation was skipped."
 fi

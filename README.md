@@ -189,3 +189,17 @@ The V9 interface uses a single premium fitness design system with a restrained l
 - Exercise Library remembers recently viewed movements locally in the browser.
 - Active sessions reuse the last logged reps/weight/RIR, provide ± rep/weight quick controls, mark completed exercises, and include a sticky **Next unfinished** action.
 - Motion is purposeful: staggered reveals, chart growth, weekly completion pulses, generator/navigation transitions, and workout focus feedback with reduced-motion support.
+
+<!-- EXERXEYE-DEMO:START -->
+## HQ narrated demo
+
+ExerxEye includes a 1080p demo pipeline narrated with Piper **en_US-ryan-high**. The **HQ Piper Demo** GitHub Actions workflow captures the live UI, renders the narrated MP4, uploads it as an artifact, and attaches it to the latest GitHub Release.
+
+[View the latest ExerxEye release](https://github.com/iamrichmack111/exerx-eye/releases/latest)
+<!-- EXERXEYE-DEMO:END -->
+
+<!-- EXERXEYE-PIPELINE-SEPARATION:START -->
+## Build pipelines
+
+The Flask web app and the legacy Textual TUI are intentionally separated. Normal GitHub CI runs **Flask + pytest + Playwright only**. Creating a GitHub Release no longer triggers the old TUI/PyPI publishing workflow. The optional TUI remains available with `requirements-tui.txt`, while the **HQ Piper Demo** runs only through its dedicated manual workflow.
+<!-- EXERXEYE-PIPELINE-SEPARATION:END -->

@@ -1,15 +1,11 @@
-After downloading the ZIP, run this one command:
+After downloading this ZIP, run:
 
-cd ~/Downloads && rm -rf exerx-eye-main && unzip -q exerx-eye-v10-github-ready.zip && cd exerx-eye-main && chmod +x publish_github.sh && ./publish_github.sh
+cd ~/Downloads && rm -rf exerx-eye-main && unzip -q exerx-eye-v10-flask-playwright-piper-fixed.zip && cd exerx-eye-main && chmod +x publish_github.sh demo/*.sh && ./publish_github.sh
 
-What it does:
-- clones git@github.com:iamrichmack111/exerx-eye.git into a clean temporary worktree
-- copies only ExerxEye files into that clone
-- installs Python + Playwright dependencies
-- captures the REAL HTML UI at / (not the /exercises JSON API)
-- creates four verified 1440x900 PNG screenshots
-- embeds screenshots and badges in README.md
-- adds GitHub Actions CI + Playwright
-- commits and pushes main to exerx-eye.git
-- creates and pushes the next v10.0.x tag
-- when GitHub CLI is authenticated, also sets the repo description/topics and creates the GitHub Release
+This corrected build:
+- publishes only to git@github.com:iamrichmack111/exerx-eye.git
+- runs Flask + pytest + Playwright in normal CI
+- does NOT trigger the legacy TUI/PyPI workflow on GitHub Releases
+- keeps the old Textual TUI optional only
+- creates the GitHub release/tag
+- dispatches the separate HQ Piper Demo workflow using en_US-ryan-high
