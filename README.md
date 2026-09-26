@@ -1,7 +1,6 @@
 # ExerxEye
 
 <!-- EXERXEYE-GITHUB:START -->
-
 [![CI + Playwright](https://github.com/iamrichmack111/exerx-eye/actions/workflows/ci.yml/badge.svg)](https://github.com/iamrichmack111/exerx-eye/actions/workflows/ci.yml)
 [![Python](https://img.shields.io/badge/Python-3.12+-3776AB?logo=python&logoColor=white)](https://python.org)
 [![Flask](https://img.shields.io/badge/Flask-Web_App-000000?logo=flask&logoColor=white)](https://flask.palletsprojects.com/)
@@ -12,18 +11,17 @@
 
 ## Screenshots
 
-### Exercise Library
+### Exercise Library — Light
+<img src="screenshots/01-exercise-library.png" alt="ExerxEye exercise library in light mode" width="900">
 
-![ExerxEye Exercise Library](screenshots/01-exercises.png)
+### Exercise Library — Dark
+<img src="screenshots/02-exercise-library-dark.png" alt="ExerxEye exercise library in dark mode" width="900">
 
 ### Login
-
-![ExerxEye Login](screenshots/02-login.png)
+<img src="screenshots/03-login.png" alt="ExerxEye login screen" width="900">
 
 ### Signup
-
-![ExerxEye Signup](screenshots/03-signup.png)
-
+<img src="screenshots/04-signup.png" alt="ExerxEye signup screen" width="900">
 <!-- EXERXEYE-GITHUB:END -->
 
 ExerxEye is a Flask exercise intelligence and training workspace backed by SQLite. It combines a searchable exercise library with private user accounts, favorites, workout planning, live session logging, analytics, exports, and a motion-rich responsive interface.

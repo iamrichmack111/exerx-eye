@@ -37,13 +37,21 @@ jobs:
       - name: Install Chromium
         run: npx playwright install --with-deps chromium
 
-      - name: Compile Python
-        run: python -m compileall -q .
+      - name: Run Python tests
+        run: pytest -q
 
-      - name: Run Playwright
+      - name: Generate Playwright screenshots
         env:
-          FLASK_SECRET_KEY: github-actions-secret
-        run: npx playwright test
+          EXERXEYE_SECRET: github-actions-secret
+        run: npx playwright test tests/screenshots.spec.cjs --project=chromium
+
+      - name: Verify screenshots
+        run: |
+          test -s screenshots/01-exercise-library.png
+          test -s screenshots/02-exercise-library-dark.png
+          test -s screenshots/03-login.png
+          test -s screenshots/04-signup.png
+          file screenshots/*.png
 
       - name: Upload screenshots
         if: always()
@@ -51,7 +59,7 @@ jobs:
         with:
           name: exerx-eye-screenshots
           path: screenshots/
-          if-no-files-found: warn
+          if-no-files-found: error
 
       - name: Upload Playwright report
         if: always()
